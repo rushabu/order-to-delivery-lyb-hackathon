@@ -38,7 +38,9 @@ export function DriverTrip() {
   if (checks.isPending) return <TripSkeleton />;
   if (checks.data && !checks.data.complete) return <ShiftChecks />;
 
-  if (list.isPending || (list.data?.length && detail.isPending)) return <TripSkeleton />;
+  // isLoading, not isPending: with every trip delivered no trip is selected, the detail query is
+  // disabled and stays "pending" forever, which left the driver on this skeleton after the last delivery.
+  if (list.isPending || detail.isLoading) return <TripSkeleton />;
   if (list.error && !list.data) {
     return (
       <Column>

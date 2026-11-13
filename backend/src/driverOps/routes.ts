@@ -174,7 +174,7 @@ export function registerDriverOpsRoutes(app: FastifyInstance, ctx: Ctx, reg: Reg
     return out;
   };
 
-  // ---- Start-of-shift checks (licence scan and voice check run in the driver's browser) ----
+  // ---- Start-of-shift check (licence scan runs in the driver's browser). The voice check was removed. ----
 
   const checksFor = (userId: string) => {
     const since = new Date(Date.now() - CHECK_VALID_HOURS * 3_600_000).toISOString();
@@ -182,7 +182,7 @@ export function registerDriverOpsRoutes(app: FastifyInstance, ctx: Ctx, reg: Reg
       (db.prepare('SELECT MAX(passed_at) AS at FROM driver_checks WHERE user_id = ? AND kind = ? AND passed_at >= ?').get(userId, kind, since) as { at: string | null }).at;
     const licence_at = last('LICENCE');
     const voice_at = last('VOICE');
-    return { licence_at, voice_at, complete: !!licence_at && !!voice_at };
+    return { licence_at, voice_at, complete: !!licence_at };
   };
 
   defineRoute(app, ctx, reg, {
