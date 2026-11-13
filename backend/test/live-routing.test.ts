@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { generatedPlan } from '../src/liveRouting/scenarios';
+import { getShipment } from '../src/shipments/repo';
 import { loadFixtures, REAL_FIXTURES_DIR } from '../src/sim/fixtures';
 import { COORD, CUST1, DRIVER1, makeApp, uuid } from './helpers';
 
@@ -91,8 +92,8 @@ describe('live truck routing demo', () => {
     const t = await makeApp({ tomTomApiKey: KEY }, REAL_FIXTURES_DIR);
     try {
       const coordinator = await t.login(COORD);
-      const customer = await t.login(CUST1);
-      const other = await t.login('USR-CUST-03');
+      const customer = await t.login('USR-CUST-04');
+      const other = await t.login(CUST1);
       const started = await t.req('POST', '/demo/live-route/start', coordinator, startPreset('kandivali-vikhroli'));
       expect(started.status).toBe(200);
       const shipment = `/shipments/${started.body.shipment_id}`;
@@ -288,6 +289,29 @@ describe('live truck routing demo', () => {
 });
 
 describe('TomTom ETA for scripted and ordered shipments', () => {
+  it('quotes the seeded bypass and recovers when TomTom cannot reconstruct the seed geometry', async () => {
+    const provider = vi.fn(async (url: URL, init: RequestInit) => {
+      if (init.method === 'POST') {
+        return Response.json({ detailedError: { code: 'CANNOT_RESTORE_BASEROUTE' } }, { status: 400 });
+      }
+      expect(url.pathname.split('/').at(-2)?.split(':')).toHaveLength(5);
+      return Response.json({ routes: [route([origin, junction, destination], 90, 20)] });
+    });
+    vi.stubGlobal('fetch', provider);
+    const t = await makeApp({ tomTomApiKey: KEY }, REAL_FIXTURES_DIR);
+    try {
+      const coordinator = await t.login(COORD);
+      const refreshed = await t.req('POST', '/shipments/SHP-1001/traffic/refresh', coordinator);
+      expect(refreshed.status).toBe(200);
+      expect(refreshed.body.live_traffic.status).toBe('LIVE');
+      const paths = provider.mock.calls.filter(([, init]) => init.method !== 'POST').map(([url]) => url.pathname);
+      expect(new Set(paths).size).toBe(2);
+      expect(paths).toHaveLength(2);
+      const shipment = getShipment(t.ctx.db, 'SHP-1001')!;
+      expect(t.ctx.routeTraffic?.drive(shipment, 'RTE-01B')?.minutes).toBe(90);
+    } finally { await t.close(); }
+  });
+
   it('uses TomTom drive time and traffic for SHP-1001 after a refresh, and baseline speeds before', async () => {
     const provider = vi.fn(async (url: URL, init: RequestInit) => {
       expect(url.searchParams.get('travelMode')).toBe('truck');
@@ -306,7 +330,7 @@ describe('TomTom ETA for scripted and ordered shipments', () => {
       expect((await t.req('POST', '/shipments/SHP-1001/traffic/refresh', await t.login(CUST1))).status).toBe(403);
       const after = await t.req('POST', '/shipments/SHP-1001/traffic/refresh', c);
       expect(after.status).toBe(200);
-      expect(provider).toHaveBeenCalledTimes(1);
+      expect(provider).toHaveBeenCalledTimes(2); // active route and the reachable bypass
       expect(after.body.live_traffic).toMatchObject({ status: 'LIVE', drive_minutes: 90, traffic_delay_min: 20 });
       const factors = after.body.current_eta.factors as { code: string; label: string; minutes: number }[];
       expect(factors).toContainEqual({ code: 'BASE_TRAVEL', label: 'Remaining drive estimate (TomTom)', minutes: 70 });

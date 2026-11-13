@@ -28,6 +28,7 @@ export const NotificationKind = z.enum([
   'ORDER_CONFIRMED',
   'NEW_TRIP',
   'ORDER_PLACED',
+  'DEPARTED',
 ]);
 
 export const ErrorResponse = z.object({
@@ -518,9 +519,11 @@ export const NewOrderForm = z.object({
   now: IsoTime,
   customers: z.array(z.object({ id: z.string(), name: z.string(), deliver_to: z.string().nullable() })),
   products: z.array(z.string()),
+  routes: z.array(z.object({ id: z.string(), customer_id: z.string(), name: z.string(), max_gross_t: z.number().nullable() })),
 });
 export const OrderDraft = z.object({
   customer_id: z.string().min(1).max(40),
+  route_id: z.string().min(1).max(40).optional(),
   product: z.string().trim().min(1).max(80),
   quantity_t: z.number().positive().max(40),
   promised_by: IsoTime,

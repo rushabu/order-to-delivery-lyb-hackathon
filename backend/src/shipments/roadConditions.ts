@@ -106,10 +106,13 @@ export class RoadConditions {
     for (const [id, entry] of this.snapshots) {
       if (entry.expires <= now) this.snapshots.delete(id);
     }
-    let entry = this.snapshots.get(route.id);
+    // Shipments sharing a road can be tens of kilometres apart.
+    const windowStart = Math.floor(progress);
+    const cacheKey = `${route.id}:${windowStart}`;
+    let entry = this.snapshots.get(cacheKey);
     if (!entry) {
-      entry = { expires: now + CACHE_MS, pending: this.load(route, progress) };
-      this.snapshots.set(route.id, entry);
+      entry = { expires: now + CACHE_MS, pending: this.load(route, windowStart) };
+      this.snapshots.set(cacheKey, entry);
     }
     const { to_km, ...snapshot } = await entry.pending;
     return {

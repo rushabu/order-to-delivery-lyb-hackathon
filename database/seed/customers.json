@@ -3,7 +3,7 @@
   "generated_by": "database/scripts/generate-seed.ts",
   "seed": 20261116,
   "schema_version": 1,
-  "note": "Fictional business customers. Names were checked on the web on 2026-11-12 (database/README.md).",
+  "note": "Fictional business customers and receiving sites for the regional and live-routing demos.",
   "customers": [
     {
       "id": "CUS-01",
@@ -30,6 +30,48 @@
         "days": "MON-SAT",
         "opens_local": "07:00",
         "closes_local": "19:00",
+        "timezone": "Asia/Kolkata"
+      }
+    },
+    {
+      "id": "CUS-03",
+      "name": "Plant X Demo Customer · Vikhroli",
+      "delivery_lat": 19.11454,
+      "delivery_lng": 72.92572,
+      "city": "Vikhroli West, Mumbai",
+      "delivery_label": "Sample receiving bay",
+      "receiving_window": {
+        "days": "MON-SAT",
+        "opens_local": "09:00",
+        "closes_local": "17:00",
+        "timezone": "Asia/Kolkata"
+      }
+    },
+    {
+      "id": "CUS-04",
+      "name": "Plant X Demo Customer · Powai",
+      "delivery_lat": 19.11809,
+      "delivery_lng": 72.90601,
+      "city": "Powai, Mumbai",
+      "delivery_label": "Sample receiving bay",
+      "receiving_window": {
+        "days": "MON-SAT",
+        "opens_local": "09:00",
+        "closes_local": "17:00",
+        "timezone": "Asia/Kolkata"
+      }
+    },
+    {
+      "id": "CUS-05",
+      "name": "Plant X Demo Customer · Chakan",
+      "delivery_lat": 18.75,
+      "delivery_lng": 73.781,
+      "city": "Chakan MIDC, Pune district",
+      "delivery_label": "Bulk receiving gate",
+      "receiving_window": {
+        "days": "MON-SAT",
+        "opens_local": "08:00",
+        "closes_local": "18:00",
         "timezone": "Asia/Kolkata"
       }
     }

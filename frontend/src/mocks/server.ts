@@ -277,7 +277,7 @@ function mockControls(i: Inputs) {
 
 const DRIVER_MILESTONES = ["IN_TRANSIT", "ARRIVED", "DELIVERED"];
 const COORD_MILESTONES = ["DISPATCHED", "CANCELLED"];
-const NEXT: Record<string, string[]> = { PLANNED: ["DISPATCHED", "CANCELLED"], DISPATCHED: ["IN_TRANSIT", "CANCELLED"], IN_TRANSIT: ["ARRIVED"], ARRIVED: ["DELIVERED"] };
+const NEXT: Record<string, string[]> = { PLANNED: ["DISPATCHED", "IN_TRANSIT", "CANCELLED"], DISPATCHED: ["IN_TRANSIT", "CANCELLED"], IN_TRANSIT: ["ARRIVED"], ARRIVED: ["DELIVERED"] };
 
 function postEvent(user: User, shipmentId: string, ev: ShipmentEventRequest, world: World): Response | Promise<Response> {
   const inputs = loadInputs();

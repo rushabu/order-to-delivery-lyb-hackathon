@@ -17,7 +17,7 @@ Plant X, the orders, and the fleet are fictional. Live routing uses real routes,
 | Mode | Configuration | What you can show |
 |---|---|---|
 | Live routing | Root launcher and a TomTom key | Fictional shipments with real routes, traffic-aware ETA, traffic flow, reported incidents, and Open-Meteo weather. |
-| Scripted replay | Root launcher | Repeatable delay and reroute walkthrough with the seeded shipment data. |
+| Scripted replay | Root launcher with `SEED_SAMPLE_ORDERS=true` in `backend/.env` | Repeatable delay and reroute walkthrough with the seeded shipment data. |
 | Browser-only mock | `VITE_USE_MOCKS=true` | Scripted walkthrough with demo sign-in buttons and local browser data. |
 
 ## Run the full app
@@ -34,7 +34,7 @@ For live routing and road conditions, set `TOMTOM_API_KEY` in `backend/.env`. Ke
 npm run dev
 ```
 
-Open [the web app](http://127.0.0.1:5173). The launcher starts the API and web app, prints both addresses, and stops both when you press Ctrl+C. It defaults to a freshly seeded in-memory database and wires the web app to the local API. After editing backend code or `backend/.env`, restart the launcher. On Windows x64, setup installs and verifies the bundled SQLite binding.
+Open [the web app](http://127.0.0.1:5173). The launcher starts both services and Ctrl+C stops them. By default it uses an in-memory database with accounts, fleet, and routes and an empty order list. Use **New order** to select a customer, choose a route, and assign a driver. Sign in as that driver and click **Leave the plant** to record dispatch and departure, update tracking, and notify the customer and coordinator. Existing file databases are preserved. Restart the launcher after editing backend code or `backend/.env`. On Windows x64, setup verifies the bundled SQLite binding.
 
 Stop any separate API or web servers already using the ports before starting. The defaults are API 4000 and web 5173. Override them with `PORT` and `WEB_PORT` in your shell when needed.
 
@@ -45,8 +45,11 @@ Use the email and password from [`database/seed/users.json`](database/seed/users
 | Role | Account |
 |---|---|
 | Coordinator | Meera Kulkarni |
-| Vikhroli, Ranjangaon or Chakan customer | Anil Deshpande or Kavita Joshi |
-| Powai or Satpur customer | Nikhil Bhosale |
+| Ranjangaon customer (Talegaon–Chakan or Pune–Shikrapur) | Anil Deshpande or Kavita Joshi |
+| Satpur customer (Kasara Ghat or Wada–Trimbakeshwar) | Nikhil Bhosale |
+| Vikhroli live demo customer | Asha Rao |
+| Powai live demo customer | Rohan Shah |
+| Chakan live demo customer | Neha Patil |
 | Live driver | The driver listed beside each shipment in Demo controls |
 
 ## Run a live shipment
@@ -55,7 +58,7 @@ Use the email and password from [`database/seed/users.json`](database/seed/users
 2. Choose **Kandivali → Vikhroli** or **Goregaon → Powai** for a Mumbai delivery-van demo. For a generated shipment, choose **Mumbai** or **Regional** under **Generator area**, leave **Seed** blank, and click **Generate shipment**. Reuse the same area and seed to reproduce the shipment inputs. Live traffic and ETA depend on when you run it.
 3. Review the preview and click **Start live shipment**. Open the trip from the list. Start another preset or generated shipment to see more lanes on the **Attention** map. The demo assigns a separate driver to each live shipment and can run three at a time.
 4. On shipment detail, show **driving time remaining** and **delivery ETA**. Driving time comes from TomTom and includes traffic. The delivery ETA also includes the planned stop. **Refresh traffic** requests an update, and the backend also refreshes roughly once a minute. If a usable alternative is returned and the shipment is at risk, the coordinator can review options and approve it while the exit is still reachable.
-5. On the coordinator or customer shipment map, open **Traffic flow and incidents**. The colored segments compare current speed with free-flow speed. Incident markers and the list show current reports near the next 20 km of the trip, including closures and roadworks when available. Traffic is sampled at up to three points and refreshes every two minutes while the map is open.
+5. On the coordinator or customer shipment map, or the driver's trip brief, open **Traffic flow and incidents**. The colored segments compare current speed with free-flow speed. Incident markers and the list show current reports near the next 20 km of the trip, including closures and roadworks when available. Traffic is sampled at up to three points and refreshes every two minutes while the map is open.
 6. Sign in as the assigned driver or the listed customer to see their views. The simulated vehicle moves at **1×**, at the average pace implied by the latest driving estimate. Its planned unloading time also runs at 1×. Use the scripted replay to show the complete lifecycle quickly. **Reset to 08:50** clears the live trips and restores the scripted seed.
 
 ### Ask the assistant
@@ -109,6 +112,10 @@ Either one replaces the invoice already there. The customer is notified, and the
 
 **Reset to 08:50** clears checks, stops, check-ins and photos.
 
+### Seeded routes and new orders
+
+For seeded routes and shipments created through **New order**, TomTom also refreshes the active corridor roughly every five minutes. The coordinator can refresh manually from shipment detail. For moving trucks, the refresh also quotes configured bypasses that are still reachable and within the truck's restrictions. Simplified seed routes use a waypoint-based quote when TomTom cannot reconstruct the stored geometry.
+
 ### Preview an electric van
 
 With a Mumbai shipment selected, expand **Preview electric van** and click **Check EV route**. Try 60% starting charge, then 25% to show how a lower charge can add a stop. TomTom estimates the route energy, arrival charge, and any charging stops for a fictional 40 kWh van and a 20% arrival reserve. The estimate includes the shipment's unloading time. This is a pre-dispatch planning check. **Start live shipment** starts the standard tracking demo.
@@ -127,7 +134,7 @@ The generator uses the five demo lanes and selects a delivery van for Mumbai loa
 
 ## Rehearse the scripted flow
 
-On **Demo controls**, select **Reset to 08:50**, then **Start replay**. Use the pause beats and incident walkthrough in the [scripted demo guide](frontend/README.md#three-window-demo-on-one-laptop). For the browser-only version, follow the [frontend-only instructions](frontend/README.md#run-it) and use the sign-in buttons on the login screen. Previewing generated shipments requires the backend. Starting them also requires TomTom access.
+To rehearse the sample replay, set `SEED_SAMPLE_ORDERS=true` and `DATABASE_FILE=:memory:` in `backend/.env` and restart. On **Demo controls**, select **Reset to 08:50**, then **Start replay**. See the [scripted demo guide](frontend/README.md#three-window-demo-on-one-laptop) for the walkthrough. To return to an empty order list, remove `SEED_SAMPLE_ORDERS` and restart. Previewing generated shipments requires the backend. Starting them also requires TomTom access.
 
 ## Troubleshooting
 

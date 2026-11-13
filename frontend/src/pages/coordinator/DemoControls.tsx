@@ -30,7 +30,7 @@ export function DemoControls() {
       {state.error && <ErrorNote what="the demo state" error={state.error} onRetry={() => state.refetch()} loadedAt={state.dataUpdatedAt || undefined} />}
       {cmd.error && <ErrorNote what="the demo command" error={cmd.error} onRetry={() => cmd.reset()} />}
 
-      <Card aria-labelledby="clock-h">
+      {d?.mode !== "REAL" && <Card aria-labelledby="clock-h">
         <CardHeader title="Replay clock" id="clock-h" />
         {!d ? (
           <Loading label="Loading demo state">
@@ -85,7 +85,7 @@ export function DemoControls() {
             </fieldset>
           </div>
         )}
-      </Card>
+      </Card>}
 
       {ANY_MOCKS && isMocked("/demo/mock-controls") && <MockFailureControls />}
     </div>

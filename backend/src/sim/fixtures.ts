@@ -132,7 +132,7 @@ export interface Fixtures {
   dir: string;
   config: FixtureConfig;
   users: FixtureUser[];
-  customers: { id: string; name: string; delivery_lat: number; delivery_lng: number }[];
+  customers: { id: string; name: string; delivery_lat: number; delivery_lng: number; city?: string; delivery_label?: string }[];
   transporters: {
     id: string;
     name: string;

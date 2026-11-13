@@ -19,6 +19,9 @@ const Ajv2020 = ((Ajv2020Module as any).default ?? Ajv2020Module) as typeof Ajv2
 export const CHECKED_COMPANY_NAMES = new Set([
   'Deccan Mouldings Pvt Ltd', 'Godavari Flexipack Pvt Ltd', 'Sahyadri Bulk Carriers', 'Konkan Roadlines',
 ]);
+const DEMO_CUSTOMER_NAMES = new Set([
+  'Plant X Demo Customer · Vikhroli', 'Plant X Demo Customer · Powai', 'Plant X Demo Customer · Chakan',
+]);
 const TARE_RANGE_T: [number, number] = [7, 12];
 
 export function schemaErrors(d: Data): string[] {
@@ -243,7 +246,7 @@ const noRealIdentifiers: Rule = (d) => {
     if (!u.phone.startsWith('+91 00000 ')) errs.push(`${u.id}: phone is not in the fake +91 00000 range`);
   }
   for (const name of [...customers.values(), ...transporters.values()].map((x) => x.name)) {
-    if (!CHECKED_COMPANY_NAMES.has(name)) errs.push(`company name not checked: ${name}`);
+    if (!CHECKED_COMPANY_NAMES.has(name) && !DEMO_CUSTOMER_NAMES.has(name)) errs.push(`company name not checked: ${name}`);
   }
   const text = JSON.stringify(d);
   for (const marker of ['LyondellBasell', 'LYB', '@gmail', '@yahoo', '@outlook', '.com"']) {

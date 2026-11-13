@@ -39,6 +39,26 @@ export function waypointsFor(gt: GroundTruth, routeId: string): Waypoint[] {
   return [...gt.common, ...(gt.branches[routeId] ?? [])];
 }
 
+function insertFixtureUser(db: Ctx['db'], u: Fixtures['users'][number]) {
+  db.prepare(`INSERT INTO users (id, name, email, password_hash, role, customer_id, transporter_id, phone)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`)
+    .run(u.id, u.name, u.email.toLowerCase(), cachedHash(`${u.id}:${u.password}`, u.password), u.role,
+      u.customer_id ?? null, u.transporter_id ?? null, u.phone ?? null);
+}
+
+/** Add missing catalog entries to an existing demo database without replacing accounts or orders. */
+export function addDemoCustomers(ctx: Ctx): void {
+  const { db, fixtures } = ctx;
+  db.transaction(() => {
+    const insert = db.prepare('INSERT INTO customers VALUES (?, ?, ?, ?) ON CONFLICT(id) DO NOTHING');
+    for (const c of fixtures.customers) insert.run(c.id, c.name, c.delivery_lat, c.delivery_lng);
+    const exists = db.prepare('SELECT 1 FROM users WHERE id = ? OR email = ?');
+    for (const u of fixtures.users) {
+      if (u.role === 'CUSTOMER' && !exists.get(u.id, u.email.toLowerCase())) insertFixtureUser(db, u);
+    }
+  })();
+}
+
 export function seedDatabase(ctx: Ctx, actorUserId: string | null): void {
   const { db } = ctx;
   const f: Fixtures = ctx.fixtures;
@@ -52,13 +72,7 @@ export function seedDatabase(ctx: Ctx, actorUserId: string | null): void {
 
     for (const c of f.customers) ins('INSERT INTO customers VALUES (?, ?, ?, ?)', c.id, c.name, c.delivery_lat, c.delivery_lng);
     for (const t of f.transporters) ins('INSERT INTO transporters VALUES (?, ?)', t.id, t.name);
-    for (const u of f.users) {
-      ins(
-        'INSERT INTO users (id, name, email, password_hash, role, customer_id, transporter_id, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        u.id, u.name, u.email.toLowerCase(), cachedHash(`${u.id}:${u.password}`, u.password), u.role,
-        u.customer_id ?? null, u.transporter_id ?? null, u.phone ?? null,
-      );
-    }
+    for (const u of f.users) insertFixtureUser(db, u);
     for (const r of f.routes) {
       ins(
         'INSERT INTO routes (id, name, origin, destination, total_km, geometry, max_gross_t, closed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -70,6 +84,8 @@ export function seedDatabase(ctx: Ctx, actorUserId: string | null): void {
       }
     }
     for (const a of f.alternatives) ins('INSERT INTO route_alternatives VALUES (?, ?, ?)', a.route_id, a.alt_route_id, a.exit_km);
+    for (const v of sc.standby_vehicles) ins('INSERT INTO standby_vehicles VALUES (?, ?, ?)', v.vehicle_reg, v.transporter_id, v.available ? 1 : 0);
+    if (ctx.config.seedSampleOrders === false) return;
 
     // History: delivered shipments for the dashboard.
     for (const h of f.history) {
@@ -86,7 +102,6 @@ export function seedDatabase(ctx: Ctx, actorUserId: string | null): void {
     }
 
     // Live scenario.
-    for (const v of sc.standby_vehicles) ins('INSERT INTO standby_vehicles VALUES (?, ?, ?)', v.vehicle_reg, v.transporter_id, v.available ? 1 : 0);
     for (const o of sc.orders) {
       ins('INSERT INTO orders VALUES (?, ?, ?, ?, ?, ?)', o.id, o.customer_id, o.product, o.quantity_t, o.original_promised_by, o.agreed_delivery_by);
     }

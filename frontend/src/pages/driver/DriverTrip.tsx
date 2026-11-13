@@ -8,7 +8,6 @@ import type { ShipmentDetail, ShipmentStatus, ShipmentSummary } from "../../api/
 import { Button, CrossFade, EmptyState, ErrorNote, Loading, RiskBadge, Skeleton, StatusTag, ConfidenceTag } from "../../components/ui";
 import { JourneyBar, positionText } from "../../components/ShipmentParts";
 import { clock, clockTz } from "../../lib/time";
-import { DEMO_MODE } from "../../lib/env";
 import { duration, easeOut } from "../../lib/motion";
 import { useCurrentTrip, useDriverOutbox } from "./useCurrentTrip";
 import { useDriverChecks } from "../../api/ops";
@@ -22,7 +21,9 @@ import { NewTripBanner, RouteAndAlerts, SafetyList, TripSwitcher } from "./TripB
   in DESIGN.md 5.3; whether it is allowed is decided by the API.
 */
 const NEXT: Partial<Record<ShipmentStatus, { to: ShipmentStatus; label: string }>> = {
-  DISPATCHED: { to: "IN_TRANSIT", label: "Start trip" },
+  // A planned trip leaves on the driver's word; the API records the dispatch with it.
+  PLANNED: { to: "IN_TRANSIT", label: "Leave the plant" },
+  DISPATCHED: { to: "IN_TRANSIT", label: "Leave the plant" },
   IN_TRANSIT: { to: "ARRIVED", label: "Arrived" },
   ARRIVED: { to: "DELIVERED", label: "Delivered" },
 };
@@ -49,7 +50,7 @@ export function DriverTrip() {
     return (
       <Column>
         <NewTripBanner />
-        <EmptyState title="No trip assigned." >Your next trip will appear here when Plant X dispatches it.</EmptyState>
+        <EmptyState title="No trip assigned.">Your next trip will appear here when Plant X assigns it.</EmptyState>
       </Column>
     );
   }
@@ -66,6 +67,9 @@ function Trip({ s, trips, error, onRetry, loadedAt }: { s: ShipmentDetail; trips
   const buttonRef = useRef<HTMLButtonElement>(null);
   const hasPhoto = useHasDeliveryPhoto(s.id);
   const needsPhoto = s.status === "ARRIVED" && !hasPhoto;
+  const leaving = next?.to === "IN_TRANSIT";
+  // One trip at a time: the API refuses a departure while another of this driver's trips is on the road or unloading.
+  const otherTrip = leaving ? trips.find((t) => t.id !== s.id && (t.status === "IN_TRANSIT" || t.status === "ARRIVED")) : undefined;
 
   function advance() {
     if (!next) return;
@@ -121,14 +125,19 @@ function Trip({ s, trips, error, onRetry, loadedAt }: { s: ShipmentDetail; trips
         {/* The next button replaces the old one at once (entry animation only), so a stale button is never tappable. */}
         {next ? (
             <motion.div key={s.status} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: duration.base, ease: easeOut }}>
-              <Button ref={buttonRef} variant="primary" size="xl" className="min-h-20 text-driver" onClick={advance} disabled={!!pendingMilestone || needsPhoto}>
+              <Button ref={buttonRef} variant="primary" size="xl" className="min-h-20 text-driver" onClick={advance} disabled={!!pendingMilestone || needsPhoto || !!otherTrip}>
                 {pendingMilestone ? (pendingMilestone.state === "retrying" ? "Not sent, retrying" : "Sending…") : next.label}
               </Button>
               {needsPhoto && <p className="mt-2 text-center text-meta text-muted">Take the delivery photo first.</p>}
+              {leaving && !pendingMilestone && (
+                <p className="mt-2 text-center text-meta text-muted">
+                  {otherTrip ? `Finish ${otherTrip.id} first.` : "Tap when you drive out of the plant gate. Plant X and the customer are told."}
+                </p>
+              )}
             </motion.div>
           ) : (
             <motion.p key="none" className="rounded-lg border border-line bg-surface p-4 text-body text-ink-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {s.status === "DELIVERED" ? "Delivered. Thank you." : s.status === "PLANNED" ? "Waiting for Plant X to dispatch this trip." : "No action needed now."}
+              {s.status === "DELIVERED" ? "Delivered. Thank you." : "No action needed now."}
             </motion.p>
           )}
       </section>
@@ -163,7 +172,7 @@ function Trip({ s, trips, error, onRetry, loadedAt }: { s: ShipmentDetail; trips
 
       <section aria-labelledby="pos-h" className="rounded-lg border border-line bg-surface p-4">
         <h2 id="pos-h" className="text-meta font-medium text-muted">
-          Position{DEMO_MODE || s.live_traffic ? ": simulated" : ""}
+          Position{s.id.startsWith("SHP-LIVE-") ? " · Simulated" : ""}
         </h2>
         <div className="mt-3">
           <JourneyBar from={routes[s.planned_route_id]?.origin ?? "Plant X"} to={s.destination_name} progressKm={s.last_position?.progress_km ?? null} totalKm={routes[s.active_route_id]?.total_km ?? null} status={s.status} />

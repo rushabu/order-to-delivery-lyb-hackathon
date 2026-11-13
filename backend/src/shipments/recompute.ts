@@ -10,7 +10,7 @@ import type { PendingHint } from '../stream/hub';
 import { buildEtaState, getShipment, getSnapshot, type ShipmentRow } from './repo';
 
 export function etaStateFor(ctx: Ctx, s: ShipmentRow, now: string) {
-  const w = ctx.config.demoMode ? undefined : ctx.weather.forRoute(s.active_route_id);
+  const w = ctx.clock.mode === 'SIMULATED' ? undefined : ctx.weather.forRoute(s.active_route_id);
   const forecast = w && w.worst && w.suggested_delay_min > 0 ? { minutes: w.suggested_delay_min, at_km: w.worst.km, reasons: w.worst.reasons } : null;
   const state = buildEtaState(ctx.db, s, now, ctx.fixtures.config.eta, forecast);
   const live = ctx.liveRouteDemo;

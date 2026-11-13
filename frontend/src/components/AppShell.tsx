@@ -173,7 +173,7 @@ function CoordinatorShell() {
 /** The replay's simulated time, always visible to the coordinator during the demo. */
 function ReplayClock() {
   const { data } = useDemoState();
-  if (!data) return null;
+  if (!data || data.mode === "REAL") return <span className="mr-auto" />;
   const running = data.scenario_status === "RUNNING";
   return (
     <NavLink to="/coordinator/demo" className="mr-auto inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-1.5 text-meta hover:border-line-strong" aria-label={`Replay clock ${clock(data.clock)} IST, ${data.scenario_status.toLowerCase().replace(/_/g, " ")}`}>

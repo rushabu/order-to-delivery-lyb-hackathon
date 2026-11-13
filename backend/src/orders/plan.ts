@@ -31,6 +31,7 @@ const NOT_FINISHED = ['PLANNED', 'DISPATCHED', 'IN_TRANSIT', 'ARRIVED'];
 
 export interface OrderInput {
   customer_id: string;
+  route_id?: string;
   product: string;
   quantity_t: number;
   promised_by: string;
@@ -92,12 +93,19 @@ function baseRoute(ctx: Ctx, customerId: string) {
   return ctx.fixtures.routes.find((r) => r.destination_customer_id === customerId && !alternatives.has(r.id));
 }
 
+function orderRoute(ctx: Ctx, input: OrderInput) {
+  return input.route_id ? ctx.fixtures.routes.find((r) =>
+    r.id === input.route_id && r.destination_customer_id === input.customer_id && !r.restrictions.closed)
+    : baseRoute(ctx, input.customer_id);
+}
+
 function tripMinutes(route: { segments: { start_km: number; end_km: number; baseline_speed_kmph: number; dwell_after_min: number }[] }): number {
   return route.segments.reduce((sum, s) => sum + ((s.end_km - s.start_km) / s.baseline_speed_kmph) * 60 + s.dwell_after_min, 0);
 }
 
 export function validateOrder(ctx: Ctx, input: OrderInput, now: string): void {
   if (!ctx.db.prepare('SELECT 1 FROM customers WHERE id = ?').get(input.customer_id)) throw validationFailed('Unknown customer');
+  if (input.route_id && !orderRoute(ctx, input)) throw validationFailed('Choose an open route to this customer');
   if (parseIso(input.promised_by) <= parseIso(now)) throw validationFailed('The promised delivery time must be in the future');
 }
 
@@ -130,6 +138,7 @@ function addToTruck(ctx: Ctx, s: ShipmentRow, input: OrderInput, fleet: Vehicle[
   if (s.status !== 'PLANNED') reason = 'This truck has already left the plant';
   else if (!vehicle || spare === null) reason = `The payload capacity of ${s.vehicle_reg} is not known`;
   else if (spare < input.quantity_t) reason = `Only ${spare} t spare: a ${vehicle.payload_capacity_t} t truck already carrying ${s.quantity_t} t`;
+  else if ((orderRoute(ctx, input)?.restrictions.max_gross_t ?? Infinity) < round1(s.gross_t + input.quantity_t)) reason = 'The combined load exceeds the route gross weight limit';
   else if (parseIso(input.promised_by) < parseIso(s.agreed_delivery_by)) reason = `This order is promised before the truck's own promise of ${istClock(s.agreed_delivery_by)}`;
   else if (!snap) reason = 'The truck has no ETA yet';
   else if (parseIso(snap.eta) > parseIso(input.promised_by)) reason = `The truck is expected at ${istClock(snap.eta)}, after this order's promise`;
@@ -162,15 +171,18 @@ function newTrucks(ctx: Ctx, input: OrderInput, fleet: Vehicle[], now: string): 
   const busy = new Set(
     (db.prepare(`SELECT vehicle_reg FROM shipments WHERE status IN (${NOT_FINISHED.map(() => '?').join(',')})`).all(...NOT_FINISHED) as { vehicle_reg: string }[]).map((r) => r.vehicle_reg),
   );
-  const route = baseRoute(ctx, input.customer_id);
+  const route = orderRoute(ctx, input);
   const taken = new Set<string>(); // two drivers of one transporter are offered different trucks
   return drivers.map((d) => {
     const option = { ...blank(`NEW-${d.id}`, 'NEW_TRUCK', `Separate truck with ${d.name}`), driver_name: d.name, transporter_name: transporterName(db, d.transporter_id) };
     if (!route) return { ...option, infeasible_reason: 'No route to this customer is set up' };
-    const vehicle = fleet
+    const available = fleet
       .filter((v) => v.transporter_id === d.transporter_id && !v.standby && !busy.has(v.registration) && !taken.has(v.registration) && v.payload_capacity_t >= input.quantity_t)
-      .sort((a, b) => a.payload_capacity_t - b.payload_capacity_t || a.registration.localeCompare(b.registration))[0];
-    if (!vehicle) return { ...option, infeasible_reason: `No free ${option.transporter_name} truck can carry ${input.quantity_t} t` };
+      .sort((a, b) => a.payload_capacity_t - b.payload_capacity_t || a.registration.localeCompare(b.registration));
+    const vehicle = available.find((v) => round1(v.tare_t + input.quantity_t) <= (route.restrictions.max_gross_t ?? Infinity));
+    if (!vehicle) return { ...option, infeasible_reason: available.length
+      ? `Available trucks exceed the ${route.restrictions.max_gross_t} t gross limit on ${route.name}`
+      : `No free ${option.transporter_name} truck can carry ${input.quantity_t} t` };
     taken.add(vehicle.registration);
     // Leave as late as still arrives an hour early, but not before loading is done. Rounded up to 5 minutes.
     const latest = parseIso(input.promised_by) - (tripMinutes(route) + ARRIVAL_BUFFER_MIN) * MIN_MS;
@@ -235,7 +247,9 @@ export function planOrder(ctx: Ctx, input: OrderInput, now: string, audience: 'C
        WHERE o.customer_id = ? AND s.status IN ('PLANNED', 'DISPATCHED', 'IN_TRANSIT') AND s.id NOT LIKE ? ORDER BY s.planned_departure, s.id`,
     )
     .all(input.customer_id, `${LIVE_SHIPMENT_PREFIX}%`) as { id: string }[]).map((r) => getShipment(db, r.id)!);
-  const adds = audience === 'CUSTOMER' ? [] : sameCustomer.map((s) => addToTruck(ctx, s, input, fleet));
+  const adds = audience === 'CUSTOMER' ? [] : sameCustomer
+    .filter((s) => !input.route_id || s.planned_route_id === input.route_id)
+    .map((s) => addToTruck(ctx, s, input, fleet));
 
   const plans = new Map<string, DriverPlan>();
   const fresh = newTrucks(ctx, input, fleet, now).map(({ plan, ...o }) => {

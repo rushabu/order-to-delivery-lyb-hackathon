@@ -7,6 +7,7 @@ export interface AppConfig {
   corsOrigins: string[];
   databaseFile: string;
   demoMode: boolean;
+  seedSampleOrders?: boolean;
   tomTomApiKey?: string;
   /** Groq key for the order-tracking assistant. Without it the assistant answers 503. */
   groqApiKey?: string;
@@ -29,6 +30,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       .filter(Boolean),
     databaseFile: env.DATABASE_FILE ?? './data/control-tower.sqlite',
     demoMode: env.DEMO_MODE === 'true',
+    seedSampleOrders: env.SEED_SAMPLE_ORDERS === 'true',
     tomTomApiKey: env.TOMTOM_API_KEY?.trim() || undefined,
     groqApiKey: env.GROQ_API_KEY?.trim() || undefined,
     groqModel: env.GROQ_MODEL?.trim() || undefined,

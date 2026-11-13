@@ -2,7 +2,8 @@
 import type { ShipmentStatusName } from '../eta/types';
 
 export const TRANSITIONS: Record<ShipmentStatusName, ShipmentStatusName[]> = {
-  PLANNED: ['DISPATCHED', 'CANCELLED'],
+  // IN_TRANSIT straight from PLANNED is the driver's "Leave the plant": the dispatch is recorded with it (events/ingest.ts).
+  PLANNED: ['DISPATCHED', 'IN_TRANSIT', 'CANCELLED'],
   DISPATCHED: ['IN_TRANSIT', 'CANCELLED'],
   IN_TRANSIT: ['ARRIVED'],
   ARRIVED: ['DELIVERED'],

@@ -87,7 +87,7 @@ function buildCustomers(routes: Record<string, any>) {
   const window = (opens: string, closes: string) => ({ days: 'MON-SAT', opens_local: opens, closes_local: closes, timezone: 'Asia/Kolkata' });
   return {
     ...header(),
-    note: 'Fictional business customers. Names were checked on the web on 2026-11-12 (database/README.md).',
+    note: 'Fictional business customers and receiving sites for the regional and live-routing demos.',
     customers: [
       {
         id: 'CUS-01', name: 'Deccan Mouldings Pvt Ltd', delivery_lat: end('RTE-01')[1], delivery_lng: end('RTE-01')[0],
@@ -96,6 +96,18 @@ function buildCustomers(routes: Record<string, any>) {
       {
         id: 'CUS-02', name: 'Godavari Flexipack Pvt Ltd', delivery_lat: end('RTE-02')[1], delivery_lng: end('RTE-02')[0],
         city: 'Satpur MIDC, Nashik', delivery_label: 'Stores gate', receiving_window: window('07:00', '19:00'),
+      },
+      {
+        id: 'CUS-03', name: 'Plant X Demo Customer · Vikhroli', delivery_lat: 19.11454, delivery_lng: 72.92572,
+        city: 'Vikhroli West, Mumbai', delivery_label: 'Sample receiving bay', receiving_window: window('09:00', '17:00'),
+      },
+      {
+        id: 'CUS-04', name: 'Plant X Demo Customer · Powai', delivery_lat: 19.11809, delivery_lng: 72.90601,
+        city: 'Powai, Mumbai', delivery_label: 'Sample receiving bay', receiving_window: window('09:00', '17:00'),
+      },
+      {
+        id: 'CUS-05', name: 'Plant X Demo Customer · Chakan', delivery_lat: 18.75, delivery_lng: 73.781,
+        city: 'Chakan MIDC, Pune district', delivery_label: 'Bulk receiving gate', receiving_window: window('08:00', '18:00'),
       },
     ],
   };
@@ -151,6 +163,9 @@ function buildUsers(rng: Rng) {
     ['USR-DRV-04', 'Prakash Jadhav', 'sahyadri', 'DRIVER', null, 'TRN-01'],
     ['USR-DRV-05', 'Imran Shaikh', 'konkan', 'DRIVER', null, 'TRN-02'],
     ['USR-DRV-06', 'Deepak More', 'konkan', 'DRIVER', null, 'TRN-02'],
+    ['USR-CUST-04', 'Asha Rao', 'vikhrolidemo', 'CUSTOMER', 'CUS-03', null],
+    ['USR-CUST-05', 'Rohan Shah', 'powaidemo', 'CUSTOMER', 'CUS-04', null],
+    ['USR-CUST-06', 'Neha Patil', 'chakandemo', 'CUSTOMER', 'CUS-05', null],
   ];
   const extra = new Rng(SEED + 1);
   const users = people.map(([id, name, domain, role, customerId, transporterId], n) => {

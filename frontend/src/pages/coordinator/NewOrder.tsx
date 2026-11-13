@@ -35,6 +35,7 @@ export function NewOrder() {
   const plan = usePlanOrder();
   const create = useCreateOrder();
   const [customerId, setCustomerId] = useState("");
+  const [routeId, setRouteId] = useState("");
   const [product, setProduct] = useState("");
   const [quantity, setQuantity] = useState("6");
   const [promise, setPromise] = useState("");
@@ -55,7 +56,17 @@ export function NewOrder() {
     );
   }
 
+  if (form.data && form.data.customers.length === 0) {
+    return (
+      <Page asCustomer={asCustomer}>
+        <EmptyState title="No order routes available.">Your existing deliveries are available in My deliveries.</EmptyState>
+      </Page>
+    );
+  }
+
   const qty = Number(quantity);
+  const routes = form.data?.routes?.filter((r) => r.customer_id === customerId) ?? [];
+  const selectedRoute = routes.find((r) => r.id === routeId) ?? routes[0];
   const valid = customerId !== "" && product.trim() !== "" && qty > 0 && qty <= 40 && promise !== "";
   const done = create.data;
 
@@ -72,7 +83,8 @@ export function NewOrder() {
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!valid || plan.isPending) return;
-    const draft: OrderDraft = { customer_id: customerId, product: product.trim(), quantity_t: qty, promised_by: istInputToIso(promise) };
+    const draft: OrderDraft = { customer_id: customerId, ...(selectedRoute && { route_id: selectedRoute.id }),
+      product: product.trim(), quantity_t: qty, promised_by: istInputToIso(promise) };
     create.reset();
     plan.mutate(draft, { onSuccess: () => setPlanned(draft) });
   }
@@ -135,7 +147,7 @@ export function NewOrder() {
               ) : (
                 <label className={LABEL} htmlFor="order-customer">
                   Customer
-                  <select id="order-customer" className={FIELD} value={customerId} onChange={(e) => edited(setCustomerId)(e.target.value)}>
+                  <select id="order-customer" className={FIELD} value={customerId} onChange={(e) => { setRouteId(""); edited(setCustomerId)(e.target.value); }}>
                     {form.data.customers.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -143,6 +155,14 @@ export function NewOrder() {
                   {customer?.deliver_to && <span className="font-normal text-muted">Deliver to {customer.deliver_to}</span>}
                 </label>
               )}
+              {selectedRoute && <label className={LABEL} htmlFor="order-route">
+                Route
+                <select id="order-route" className={FIELD} value={selectedRoute.id} onChange={(e) => edited(setRouteId)(e.target.value)}>
+                  {routes.map((r) => <option key={r.id} value={r.id}>
+                    {r.name} ({r.id}){r.max_gross_t !== null ? ` · ${r.max_gross_t} t gross limit` : ""}
+                  </option>)}
+                </select>
+              </label>}
               <label className={LABEL} htmlFor="order-product">
                 Product
                 <select id="order-product" className={FIELD} value={product} onChange={(e) => edited(setProduct)(e.target.value)}>

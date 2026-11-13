@@ -1,5 +1,5 @@
 import { randomInt } from 'node:crypto';
-import { pointAtKm, type LngLat } from '../shipments/geometry';
+import type { LngLat } from '../shipments/geometry';
 import type { Fixtures } from '../sim/fixtures';
 
 export const LIVE_SHIPMENT_PREFIX = 'SHP-LIVE';
@@ -60,16 +60,22 @@ export function demoLanes(fixtures: Fixtures): DemoLane[] {
   if (!pune?.geometry || !nashik?.geometry || pune.total_km <= 100) return [];
   const origin = pune.geometry.coordinates[0];
   const origin_name = pune.origin;
-  return [
+  const lanes: Omit<DemoLane, 'destination' | 'destination_name'>[] = [
     // Public map locations anchor the demo. The dispatch and receiving points are fictional.
     { id: 'kandivali-vikhroli', area: 'mumbai', label: 'Kandivali → Vikhroli', origin_name: 'Kandivali East · Akurli Road',
-      origin: [72.86619, 19.20127], destination_name: 'Vikhroli West receiving point', destination: [72.92572, 19.11454], customer_id: 'CUS-01' },
+      origin: [72.86619, 19.20127], customer_id: 'CUS-03' },
     { id: 'goregaon-powai', area: 'mumbai', label: 'Goregaon → Powai', origin_name: 'Goregaon East · Western Express Highway',
-      origin: [72.85652, 19.15272], destination_name: 'Powai receiving point · Hiranandani area', destination: [72.90601, 19.11809], customer_id: 'CUS-02' },
-    { id: 'ranjangaon', area: 'regional', label: 'Panvel → Ranjangaon', origin, origin_name, destination_name: pune.destination, customer_id: 'CUS-01', destination: pune.geometry.coordinates.at(-1)! },
-    { id: 'satpur', area: 'regional', label: 'Panvel → Satpur, Nashik', origin, origin_name, destination_name: nashik.destination, customer_id: 'CUS-02', destination: nashik.geometry.coordinates.at(-1)! },
-    { id: 'chakan', area: 'regional', label: 'Panvel → Chakan', origin, origin_name, destination_name: 'Deccan Mouldings, Chakan receiving point', customer_id: 'CUS-01', destination: pointAtKm(pune.geometry.coordinates, pune.total_km, 100, pune.geometry.chainage_km) },
+      origin: [72.85652, 19.15272], customer_id: 'CUS-04' },
+    { id: 'ranjangaon', area: 'regional', label: 'Panvel → Ranjangaon', origin, origin_name, customer_id: 'CUS-01' },
+    { id: 'satpur', area: 'regional', label: 'Panvel → Satpur, Nashik', origin, origin_name, customer_id: 'CUS-02' },
+    { id: 'chakan', area: 'regional', label: 'Panvel → Chakan', origin, origin_name, customer_id: 'CUS-05' },
   ];
+  return lanes.flatMap((lane) => {
+    const customer = fixtures.customers.find((entry) => entry.id === lane.customer_id);
+    if (!customer) return [];
+    return [{ ...lane, destination: [customer.delivery_lng, customer.delivery_lat],
+      destination_name: [customer.city ?? customer.name, customer.delivery_label].filter(Boolean).join(' · ') }];
+  });
 }
 
 function plan(fixtures: Fixtures, lane: DemoLane, product: string, quantity: number, vehicle: ShipmentDraft['vehicle'], stop: number, slack: number, source: Pick<ShipmentDraft, 'preset_id' | 'seed'>): DraftPlan {
@@ -82,8 +88,11 @@ function plan(fixtures: Fixtures, lane: DemoLane, product: string, quantity: num
 export function presetPlans(fixtures: Fixtures): DraftPlan[] {
   const lanes = demoLanes(fixtures);
   if (!lanes.length) return [];
-  return PRESETS.map((preset) => plan(fixtures, lanes.find((lane) => lane.id === preset.lane)!, preset.product, preset.load,
-    preset.vehicle === 'van' ? CITY_VAN : VEHICLES[preset.vehicle], preset.stop, preset.slack, { preset_id: preset.id, seed: null }));
+  return PRESETS.flatMap((preset) => {
+    const lane = lanes.find((item) => item.id === preset.lane);
+    return lane ? [plan(fixtures, lane, preset.product, preset.load,
+      preset.vehicle === 'van' ? CITY_VAN : VEHICLES[preset.vehicle], preset.stop, preset.slack, { preset_id: preset.id, seed: null })] : [];
+  });
 }
 
 export function generatedPlan(fixtures: Fixtures, seed = randomInt(0, 0x100000000), area: DemoArea = 'regional'): DraftPlan | undefined {

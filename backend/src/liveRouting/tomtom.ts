@@ -61,9 +61,11 @@ export async function calculateTruckRoutes(
   grossTonnes: number,
   vehicle: ShipmentDraft['vehicle'],
   supportingPoints?: LngLat[],
+  waypoints: LngLat[] = [],
 ): Promise<TruckRoute[]> {
   const endpoint = (p: LngLat) => `${p[1]},${p[0]}`;
-  const url = new URL(`https://api.tomtom.com/routing/1/calculateRoute/${endpoint(origin)}:${endpoint(destination)}/json`);
+  const locations = [origin, ...waypoints, destination].map(endpoint).join(':');
+  const url = new URL(`https://api.tomtom.com/routing/1/calculateRoute/${locations}/json`);
   url.search = new URLSearchParams({
     key,
     travelMode: 'truck',
@@ -75,7 +77,7 @@ export async function calculateTruckRoutes(
     traffic: 'true',
     computeTravelTimeFor: 'all',
     sectionType: 'traffic',
-    maxAlternatives: supportingPoints ? '0' : '1',
+    maxAlternatives: supportingPoints || waypoints.length ? '0' : '1',
     ...(supportingPoints ? { reconstructionMode: 'strict' } : {}),
   }).toString();
   const response = await fetch(url, {
@@ -86,7 +88,13 @@ export async function calculateTruckRoutes(
       body: JSON.stringify({ supportingPoints: supportingPoints.map(([longitude, latitude]) => ({ latitude, longitude })) }),
     } : {}),
   });
-  if (!response.ok) throw new Error(`TomTom returned HTTP ${response.status}`);
+  if (!response.ok) {
+    const body = response.status === 400 ? await response.json().catch(() => null) : null;
+    if (body?.detailedError?.code === 'CANNOT_RESTORE_BASEROUTE') throw new RouteReconstructionError();
+    throw new Error(`TomTom returned HTTP ${response.status}`);
+  }
   const payload = z.object({ routes: z.array(Route).min(1) }).parse(await response.json());
   return payload.routes.map(parseRoute);
 }
+
+export class RouteReconstructionError extends Error {}

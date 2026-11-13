@@ -19,7 +19,8 @@ export type NotificationKind =
   | 'INVOICE_READY'
   | 'ORDER_CONFIRMED'
   | 'NEW_TRIP'
-  | 'ORDER_PLACED';
+  | 'ORDER_PLACED'
+  | 'DEPARTED';
 
 export interface NewNotification {
   user_id: string;

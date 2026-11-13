@@ -17,7 +17,7 @@ export function registerWeatherRoutes(app: FastifyInstance, ctx: Ctx, reg: Regis
         status: 200,
         body: {
           // In demo mode the forecast is shown only; in live mode it also adds an ETA factor.
-          mode: ctx.config.demoMode ? ('ADVISORY' as const) : ('LIVE' as const),
+          mode: ctx.clock.mode === 'SIMULATED' ? ('ADVISORY' as const) : ('LIVE' as const),
           source: 'Open-Meteo (open-meteo.com), hourly forecast',
           thresholds: ctx.weather.cfg,
           ...w,

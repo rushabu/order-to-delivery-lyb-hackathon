@@ -111,7 +111,7 @@ export function ShipmentDetailPage() {
               <p className="tnum mt-3 text-body text-ink-2">
                 <span className="font-medium text-ink">Position:</span> {positionText(s, routes[s.active_route_id])}
               </p>
-              {s.live_traffic && <div className="mt-3"><LiveTrafficPanel traffic={s.live_traffic} refreshShipmentId={s.status === "IN_TRANSIT" ? s.id : undefined} /></div>}
+              {s.live_traffic && <div className="mt-3"><LiveTrafficPanel traffic={s.live_traffic} refreshShipmentId={["PLANNED", "DISPATCHED", "IN_TRANSIT"].includes(s.status) ? s.id : undefined} /></div>}
             </div>
           </Card>
 

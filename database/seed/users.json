@@ -101,6 +101,33 @@
       "role": "DRIVER",
       "transporter_id": "TRN-02",
       "phone": "+91 00000 00011"
+    },
+    {
+      "id": "USR-CUST-04",
+      "name": "Asha Rao",
+      "email": "asha.rao@vikhrolidemo.example",
+      "password": "KrhnU7xHfUXbsA",
+      "role": "CUSTOMER",
+      "customer_id": "CUS-03",
+      "phone": "+91 00000 00012"
+    },
+    {
+      "id": "USR-CUST-05",
+      "name": "Rohan Shah",
+      "email": "rohan.shah@powaidemo.example",
+      "password": "nq9WJCcvknQXaH",
+      "role": "CUSTOMER",
+      "customer_id": "CUS-04",
+      "phone": "+91 00000 00013"
+    },
+    {
+      "id": "USR-CUST-06",
+      "name": "Neha Patil",
+      "email": "neha.patil@chakandemo.example",
+      "password": "GNtxYaCvafwJHG",
+      "role": "CUSTOMER",
+      "customer_id": "CUS-05",
+      "phone": "+91 00000 00014"
     }
   ]
 }

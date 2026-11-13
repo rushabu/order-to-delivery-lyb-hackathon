@@ -70,7 +70,9 @@ function generate(ctx: Ctx, alert: AlertRow, s: ShipmentRow, now: string, actorU
       current_total_km: current.total_km,
       max_gross_t: r.max_gross_t,
       closed: r.closed === 1,
-      liveDrive: state.liveRouting ? ctx.liveRouteDemo?.drive(r.id, s.last_progress_km) : undefined,
+      liveDrive: ctx.liveRouteDemo?.isLiveShipment(s.id)
+        ? ctx.liveRouteDemo.drive(r.id, s.last_progress_km)
+        : ctx.routeTraffic?.drive(s, r.id),
     };
   });
   const standby = db.prepare('SELECT 1 FROM standby_vehicles WHERE available = 1 LIMIT 1').get() !== undefined;

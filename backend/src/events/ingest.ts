@@ -2,6 +2,7 @@
 // the simulator (DESIGN.md 5.6). Storing the event, applying it, writing the ETA snapshot, alerts,
 // notifications and audit rows all happen in one transaction. Stream hints are sent after commit.
 import { audit } from '../audit';
+import { stableUuid } from '../sim/ids';
 import type { AuthUser } from '../auth/policy';
 import { shipmentNow, type Ctx } from '../ctx';
 import type { ShipmentStatusName } from '../eta/types';
@@ -84,7 +85,7 @@ export function ingestEvent(ctx: Ctx, input: IngestInput): { status: 200 | 201; 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'STORED_NOT_APPLIED', '{}')`,
       ).run(ev.event_id, s.id, ev.type, occurredAt, now, input.source, actorId, JSON.stringify(ev.payload));
 
-      const applied = applyEvent(ctx, s, ev, occurredAt, now, hints);
+      const applied = applyEvent(ctx, s, ev, occurredAt, now, hints, input);
       const after = getShipment(db, s.id)!;
       const body: EventResult = {
         event_id: ev.event_id,
@@ -128,7 +129,7 @@ function bump(ctx: Ctx, id: string, plan = false) {
   ctx.db.prepare(`UPDATE shipments SET version = version + 1${plan ? ', plan_version = plan_version + 1' : ''} WHERE id = ?`).run(id);
 }
 
-function applyEvent(ctx: Ctx, s: ShipmentRow, ev: EventRequest, at: string, now: string, hints: PendingHint[]): Applied {
+function applyEvent(ctx: Ctx, s: ShipmentRow, ev: EventRequest, at: string, now: string, hints: PendingHint[], input: IngestInput): Applied {
   const { db } = ctx;
   switch (ev.type) {
     case 'POSITION': {
@@ -160,9 +161,32 @@ function applyEvent(ctx: Ctx, s: ShipmentRow, ev: EventRequest, at: string, now:
       if (!canTransition(s.status, to)) {
         throw new ApiError(409, 'INVALID_TRANSITION', `Cannot move from ${s.status} to ${to}`, { from: s.status, to });
       }
+      if (to === 'IN_TRANSIT') {
+        // A driver is on one trip at a time: the next one cannot leave while another is on the road or unloading.
+        const busy = input.actor?.role === 'DRIVER'
+          ? (db.prepare(`SELECT id FROM shipments WHERE driver_user_id = ? AND id <> ? AND status IN ('IN_TRANSIT', 'ARRIVED') ORDER BY id LIMIT 1`)
+              .get(input.actor.id, s.id) as { id: string } | undefined)
+          : undefined;
+        if (busy) throw new ApiError(409, 'TRIP_IN_PROGRESS', `Finish ${busy.id} before leaving on another trip`, { shipment_id: busy.id });
+        // "Leave the plant" on a trip nobody dispatched: record the dispatch at the same moment, so the
+        // milestone history still shows every stage.
+        if (s.status === 'PLANNED') {
+          const dispatch = { event_id: stableUuid(`auto-dispatch:${ev.event_id}`), apply_status: 'APPLIED', shipment_id: s.id, shipment_version: s.version, occurred_at: at, eta_snapshot_id: null };
+          db.prepare(
+            `INSERT INTO shipment_events (event_id, shipment_id, type, occurred_at, received_at, source, actor_user_id, payload, apply_status, result)
+             VALUES (?, ?, 'MILESTONE', ?, ?, ?, ?, ?, 'APPLIED', ?)`,
+          ).run(dispatch.event_id, s.id, at, now, input.source, input.actor?.id ?? null, JSON.stringify({ to_status: 'DISPATCHED', with_departure: true }), JSON.stringify(dispatch));
+        }
+      }
       const col = { IN_TRANSIT: 'departed_at', ARRIVED: 'arrived_at', DELIVERED: 'delivered_at' }[to as string];
       db.prepare(`UPDATE shipments SET status = ?${col ? `, ${col} = ?` : ''} WHERE id = ?`).run(...(col ? [to, at, s.id] : [to, s.id]));
-      bump(ctx, s.id);
+      if (to === 'IN_TRANSIT' && input.actor?.role === 'DRIVER' && s.last_position_at === null) {
+        const route = getRoute(db, s.active_route_id);
+        const origin = route?.geometry ? JSON.parse(route.geometry).coordinates[0] : undefined;
+        if (origin) db.prepare('UPDATE shipments SET last_lng = ?, last_lat = ?, last_progress_km = 0, last_position_at = ? WHERE id = ?')
+          .run(origin[0], origin[1], at, s.id);
+      }
+      bump(ctx, s.id, to === 'IN_TRANSIT');
       const hint = (kinds: string[]) =>
         hints.push({
           hint: { entity: 'shipment', id: s.id, version: s.version + 1, kinds },
@@ -189,6 +213,17 @@ function applyEvent(ctx: Ctx, s: ShipmentRow, ev: EventRequest, at: string, now:
         }
         hint(['status']);
         return { status: 'APPLIED', snapshotId: null };
+      }
+      // The driver said they have left: the plant and the customer are told. (The replay's own departures stay quiet.)
+      if (to === 'IN_TRANSIT' && input.actor?.role === 'DRIVER') {
+        for (const u of [...customerUserIds(db, s.customer_id), ...coordinatorIds(db)]) {
+          ctx.notifier.send(
+            db,
+            now,
+            { user_id: u, shipment_id: s.id, kind: 'DEPARTED', title: `${s.order_id} has left the plant`, body: `${s.vehicle_reg} left at ${istClock(at)}.` },
+            hints,
+          );
+        }
       }
       return { status: 'APPLIED', snapshotId: recomputeEta(ctx, s.id, now, ev.event_id, 'EVENT', hints) };
     }

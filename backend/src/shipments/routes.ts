@@ -107,7 +107,8 @@ export function shipmentDetail(ctx: Ctx, user: AuthUser, s: ShipmentRow) {
     ...(db
       .prepare(
         `SELECT json_extract(payload, '$.to_status') AS status, occurred_at AS at FROM shipment_events
-         WHERE shipment_id = ? AND type = 'MILESTONE' AND apply_status = 'APPLIED' ORDER BY occurred_at`,
+         WHERE shipment_id = ? AND type = 'MILESTONE' AND apply_status = 'APPLIED'
+         ORDER BY occurred_at, CASE json_extract(payload, '$.to_status') WHEN 'DISPATCHED' THEN 1 WHEN 'IN_TRANSIT' THEN 2 WHEN 'ARRIVED' THEN 3 ELSE 4 END`,
       )
       .all(s.id) as { status: string; at: string }[]),
   ];

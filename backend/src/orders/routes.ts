@@ -29,11 +29,17 @@ export function registerOrderRoutes(app: FastifyInstance, ctx: Ctx, reg: Registe
     handler: ({ user }) => {
       const alternatives = new Set(ctx.fixtures.alternatives.map((a) => a.alt_route_id));
       const all = db.prepare('SELECT id, name FROM customers ORDER BY id').all() as { id: string; name: string }[];
-      const customers = all
-        .filter((c) => user!.role !== 'CUSTOMER' || c.id === user!.customer_id)
-        .map((c) => ({ ...c, deliver_to: ctx.fixtures.routes.find((r) => r.destination_customer_id === c.id && !alternatives.has(r.id))?.destination ?? null }));
-      const products = (db.prepare('SELECT DISTINCT product FROM orders ORDER BY product').all() as { product: string }[]).map((r) => r.product);
-      return { status: 200, body: { now: ctx.clock.nowIso(), customers, products } };
+      const customers = all.flatMap((c) => {
+        if (user!.role === 'CUSTOMER' && c.id !== user!.customer_id) return [];
+        const primary = ctx.fixtures.routes.find((r) => r.destination_customer_id === c.id && !alternatives.has(r.id));
+        return primary ? [{ ...c, deliver_to: primary.destination }] : [];
+      });
+      const products = [...new Set([...ctx.fixtures.scenario.orders, ...ctx.fixtures.history].map((o) => o.product))].sort();
+      const visibleCustomers = new Set(customers.map((c) => c.id));
+      const routes = ctx.fixtures.routes.flatMap((r) => r.destination_customer_id && visibleCustomers.has(r.destination_customer_id) && !r.restrictions.closed
+        ? [{ id: r.id, name: r.name, customer_id: r.destination_customer_id, max_gross_t: r.restrictions.max_gross_t ?? null }]
+        : []);
+      return { status: 200, body: { now: ctx.clock.nowIso(), customers, products, routes } };
     },
   });
 

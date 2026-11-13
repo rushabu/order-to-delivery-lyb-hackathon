@@ -350,7 +350,7 @@ export interface Notification {
   id: string;
   user_id: string;
   shipment_id: string | null;
-  kind: "RISK_MEDIUM" | "RISK_HIGH" | "DECISION_APPLIED" | "BACK_ON_SCHEDULE" | "TRACKING_LOST" | "DELIVERED" | "DELIVERY_PHOTO" | "DELIVERY_VERIFIED" | "CHECKIN_REQUEST" | "CHECKIN_REPLY" | "DRIVER_STOP" | "INVOICE_READY" | "ORDER_CONFIRMED" | "NEW_TRIP" | "ORDER_PLACED";
+  kind: "RISK_MEDIUM" | "RISK_HIGH" | "DECISION_APPLIED" | "BACK_ON_SCHEDULE" | "TRACKING_LOST" | "DELIVERED" | "DELIVERY_PHOTO" | "DELIVERY_VERIFIED" | "CHECKIN_REQUEST" | "CHECKIN_REPLY" | "DRIVER_STOP" | "INVOICE_READY" | "ORDER_CONFIRMED" | "NEW_TRIP" | "ORDER_PLACED" | "DEPARTED";
   title: string;
   body: string;
   created_at: string;
@@ -384,6 +384,7 @@ export interface ImpactMetrics {
 
 /** PROPOSED: 5.5 says "clock time, speed, scenario status" */
 export interface DemoState {
+  mode?: "REAL" | "SIMULATED";
   clock: string;
   speed: number;
   paused: boolean;
@@ -445,9 +446,11 @@ export interface NewOrderForm {
   now: string;
   customers: { id: string; name: string; deliver_to: string | null }[];
   products: string[];
+  routes?: { id: string; customer_id: string; name: string; max_gross_t: number | null }[];
 }
 export interface OrderDraft {
   customer_id: string;
+  route_id?: string;
   product: string;
   quantity_t: number;
   promised_by: string;
