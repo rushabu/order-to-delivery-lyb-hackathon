@@ -1,0 +1,32 @@
+# Render blueprint for the API (backend/). The web app is deployed separately on Vercel (frontend/vercel.json).
+# The API reads database/migrations and database/seed from this repository, so the whole repo is checked out
+# and only the working directory is backend/. With DATABASE_FILE=:memory: every restart starts from the seed,
+# the same as "Reset to 08:50". Exactly one instance may run (in-memory live-update hub).
+services:
+  - type: web
+    name: control-tower-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_FILE
+        value: ":memory:"
+      - key: DEMO_MODE
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      # The Vercel address of the web app, e.g. https://lyb-control-tower.vercel.app (comma-separate several).
+      - key: CORS_ORIGINS
+        sync: false
+      - key: TOMTOM_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
