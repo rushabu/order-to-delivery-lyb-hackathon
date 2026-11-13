@@ -1,0 +1,106 @@
+{
+  "fictional": true,
+  "generated_by": "database/scripts/generate-seed.ts",
+  "seed": 20261116,
+  "schema_version": 1,
+  "note": "Fictional people. Passwords are demo values for seeding only; the API hashes them at startup. Phone numbers are not valid Indian numbers.",
+  "users": [
+    {
+      "id": "USR-COORD-01",
+      "name": "Meera Kulkarni",
+      "email": "meera.kulkarni@plantx.example",
+      "password": "g93xreMDQeFdpg",
+      "role": "COORDINATOR",
+      "phone": "+91 00000 00001"
+    },
+    {
+      "id": "USR-COORD-02",
+      "name": "Farhan Qureshi",
+      "email": "farhan.qureshi@plantx.example",
+      "password": "3ACpnWKzATJsta",
+      "role": "COORDINATOR",
+      "phone": "+91 00000 00002"
+    },
+    {
+      "id": "USR-DRV-01",
+      "name": "Ravi Shinde",
+      "email": "ravi.shinde@sahyadri.example",
+      "password": "LfznJuawWA3WDX",
+      "role": "DRIVER",
+      "transporter_id": "TRN-01",
+      "phone": "+91 00000 00003"
+    },
+    {
+      "id": "USR-DRV-02",
+      "name": "Gurpreet Sandhu",
+      "email": "gurpreet.sandhu@konkan.example",
+      "password": "tKE3hAzKcgNXCR",
+      "role": "DRIVER",
+      "transporter_id": "TRN-02",
+      "phone": "+91 00000 00004"
+    },
+    {
+      "id": "USR-DRV-03",
+      "name": "Sunil Pawar",
+      "email": "sunil.pawar@sahyadri.example",
+      "password": "txJuaUC9nsyPvd",
+      "role": "DRIVER",
+      "transporter_id": "TRN-01",
+      "phone": "+91 00000 00005"
+    },
+    {
+      "id": "USR-CUST-01",
+      "name": "Anil Deshpande",
+      "email": "anil.deshpande@deccanmouldings.example",
+      "password": "nPUpUxgwuKMEvn",
+      "role": "CUSTOMER",
+      "customer_id": "CUS-01",
+      "phone": "+91 00000 00006"
+    },
+    {
+      "id": "USR-CUST-02",
+      "name": "Kavita Joshi",
+      "email": "kavita.joshi@deccanmouldings.example",
+      "password": "yPENr9pdUnJNmr",
+      "role": "CUSTOMER",
+      "customer_id": "CUS-01",
+      "phone": "+91 00000 00007"
+    },
+    {
+      "id": "USR-CUST-03",
+      "name": "Nikhil Bhosale",
+      "email": "nikhil.bhosale@godavariflexi.example",
+      "password": "tYJVUD3hFwb7bE",
+      "role": "CUSTOMER",
+      "customer_id": "CUS-02",
+      "phone": "+91 00000 00008"
+    },
+    {
+      "id": "USR-DRV-04",
+      "name": "Prakash Jadhav",
+      "email": "prakash.jadhav@sahyadri.example",
+      "password": "dDRUa7AvCddsEr",
+      "role": "DRIVER",
+      "transporter_id": "TRN-01",
+      "phone": "+91 00000 00009"
+    },
+    {
+      "id": "USR-DRV-05",
+      "name": "Imran Shaikh",
+      "email": "imran.shaikh@konkan.example",
+      "password": "NperEuUaHCeeMs",
+      "role": "DRIVER",
+      "transporter_id": "TRN-02",
+      "phone": "+91 00000 00010"
+    },
+    {
+      "id": "USR-DRV-06",
+      "name": "Deepak More",
+      "email": "deepak.more@konkan.example",
+      "password": "wvx3gcgQyRJeeh",
+      "role": "DRIVER",
+      "transporter_id": "TRN-02",
+      "phone": "+91 00000 00011"
+    }
+  ]
+}

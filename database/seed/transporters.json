@@ -1,0 +1,95 @@
+{
+  "fictional": true,
+  "generated_by": "database/scripts/generate-seed.ts",
+  "seed": 20261116,
+  "schema_version": 1,
+  "note": "Fictional haulage companies. Registrations use the series MH 99, above any Maharashtra RTO code in use.",
+  "transporters": [
+    {
+      "id": "TRN-01",
+      "name": "Sahyadri Bulk Carriers",
+      "base": "Panvel area",
+      "vehicles": [
+        {
+          "id": "VEH-S1",
+          "registration": "MH 99 SB 4127",
+          "body": "12-wheeler",
+          "payload_capacity_t": 25,
+          "tare_t": 9.6,
+          "standby": false
+        },
+        {
+          "id": "VEH-S2",
+          "registration": "MH 99 SB 4385",
+          "body": "14-wheeler",
+          "payload_capacity_t": 28,
+          "tare_t": 10.8,
+          "standby": false
+        },
+        {
+          "id": "VEH-S3",
+          "registration": "MH 99 SB 5012",
+          "body": "12-wheeler",
+          "payload_capacity_t": 25,
+          "tare_t": 9.4,
+          "standby": true
+        },
+        {
+          "id": "VEH-S4",
+          "registration": "MH 99 SB 5260",
+          "body": "14-wheeler",
+          "payload_capacity_t": 28,
+          "tare_t": 10.6,
+          "standby": false
+        },
+        {
+          "id": "VEH-S5",
+          "registration": "MH 99 SB 6131",
+          "body": "10-wheeler",
+          "payload_capacity_t": 20,
+          "tare_t": 8.4,
+          "standby": false
+        }
+      ]
+    },
+    {
+      "id": "TRN-02",
+      "name": "Konkan Roadlines",
+      "base": "Bhiwandi",
+      "vehicles": [
+        {
+          "id": "VEH-K1",
+          "registration": "MH 99 KR 2291",
+          "body": "12-wheeler",
+          "payload_capacity_t": 25,
+          "tare_t": 10,
+          "standby": false
+        },
+        {
+          "id": "VEH-K2",
+          "registration": "MH 99 KR 2617",
+          "body": "14-wheeler",
+          "payload_capacity_t": 28,
+          "tare_t": 10.9,
+          "standby": false
+        },
+        {
+          "id": "VEH-K3",
+          "registration": "MH 99 KR 3048",
+          "body": "10-wheeler",
+          "payload_capacity_t": 20,
+          "tare_t": 8.2,
+          "standby": false
+        },
+        {
+          "id": "VEH-K4",
+          "registration": "MH 99 KR 3315",
+          "body": "12-wheeler",
+          "payload_capacity_t": 25,
+          "tare_t": 9.8,
+          "standby": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "title": "Shared definitions for the fixture schemas",
+  "$defs": {
+    "file": {
+      "description": "Header fields at the top of every fixture file. The API loader reads `fictional` here.",
+      "type": "object",
+      "required": ["fictional", "generated_by", "seed", "schema_version", "note"],
+      "properties": {
+        "fictional": {"const": true},
+        "generated_by": {"const": "database/scripts/generate-seed.ts"},
+        "seed": {"type": "integer"},
+        "schema_version": {"const": 1},
+        "note": {"type": "string"}
+      }
+    },
+    "utc": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+    "local_time": {"type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"},
+    "lat": {"type": "number", "minimum": 15.5, "maximum": 22.1},
+    "lng": {"type": "number", "minimum": 72.6, "maximum": 80.9},
+    "uuid": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "category": {"enum": ["ACCIDENT", "BREAKDOWN", "WEATHER", "ROAD_CLOSURE", "LOADING_DELAY", "OTHER"]},
+    "cause": {"enum": ["ACCIDENT", "BREAKDOWN", "WEATHER", "ROAD_CLOSURE", "LOADING_DELAY", "OTHER", "CONGESTION"]},
+    "registration": {"type": "string", "pattern": "^MH 99 [A-Z]{2} \\d{4}$"}
+  }
+}

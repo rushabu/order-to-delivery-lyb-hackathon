@@ -1,0 +1,37 @@
+{
+  "fictional": true,
+  "generated_by": "database/scripts/generate-seed.ts",
+  "seed": 20261116,
+  "schema_version": 1,
+  "note": "Fictional business customers. Names were checked on the web on 2026-11-12 (database/README.md).",
+  "customers": [
+    {
+      "id": "CUS-01",
+      "name": "Deccan Mouldings Pvt Ltd",
+      "delivery_lat": 18.7704,
+      "delivery_lng": 74.24142,
+      "city": "Ranjangaon MIDC, Pune district",
+      "delivery_label": "Receiving gate",
+      "receiving_window": {
+        "days": "MON-SAT",
+        "opens_local": "08:00",
+        "closes_local": "18:00",
+        "timezone": "Asia/Kolkata"
+      }
+    },
+    {
+      "id": "CUS-02",
+      "name": "Godavari Flexipack Pvt Ltd",
+      "delivery_lat": 20.00997,
+      "delivery_lng": 73.73003,
+      "city": "Satpur MIDC, Nashik",
+      "delivery_label": "Stores gate",
+      "receiving_window": {
+        "days": "MON-SAT",
+        "opens_local": "07:00",
+        "closes_local": "19:00",
+        "timezone": "Asia/Kolkata"
+      }
+    }
+  ]
+}

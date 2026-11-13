@@ -1,0 +1,19 @@
+{
+  "name": "control-tower-database",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fictional seed data for the Order-to-Delivery Control Tower, with its generator, validator and checks.",
+  "type": "module",
+  "scripts": {
+    "seed:generate": "tsx scripts/generate-seed.ts",
+    "seed:validate": "tsx scripts/validate-seed.ts",
+    "samples:invoices": "tsx scripts/make-sample-invoices.ts",
+    "test": "vitest run"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "tsx": "^4.23.15",
+    "vitest": "^5.1.0"
+  }
+}

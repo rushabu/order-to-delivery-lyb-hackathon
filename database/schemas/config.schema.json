@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "config.schema.json",
+  "title": "config.json: thresholds and defaults from DESIGN.md sections 6.3 to 6.7",
+  "$ref": "common.schema.json#/$defs/file",
+  "$defs": {
+    "threshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["precipitation_mm", "visibility_m", "wind_kmph", "delay_min"],
+      "properties": {
+        "precipitation_mm": {"type": "number", "minimum": 0},
+        "visibility_m": {"type": "number", "minimum": 0},
+        "wind_kmph": {"type": "number", "minimum": 0},
+        "delay_min": {"type": "integer", "minimum": 0}
+      }
+    }
+  },
+  "required": ["fictional_assumptions", "eta", "category_default_delay_min", "alerts", "options", "impact", "demo", "disruptions", "weather", "invoice"],
+  "properties": {
+    "fictional_assumptions": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "eta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pace_window_min", "pace_min_positions", "pace_horizon_km", "slowdown_min", "slowdown_max",
+                   "pace_min_factor_min", "disruption_floor_min", "margin_floor_min", "margin_pct", "stale_after_min",
+                   "stale_margin_max_add_min", "tracking_lost_after_min", "risk_medium_from", "risk_high_from"],
+      "properties": {
+        "pace_window_min": {"type": "integer", "minimum": 1},
+        "pace_min_positions": {"type": "integer", "minimum": 2},
+        "pace_horizon_km": {"type": "number", "exclusiveMinimum": 0},
+        "slowdown_min": {"type": "number", "exclusiveMinimum": 0},
+        "slowdown_max": {"type": "number", "exclusiveMinimum": 0},
+        "pace_min_factor_min": {"type": "integer", "minimum": 0},
+        "disruption_floor_min": {"type": "integer", "minimum": 0},
+        "margin_floor_min": {"type": "integer", "minimum": 0},
+        "margin_pct": {"type": "number", "minimum": 0, "maximum": 100},
+        "stale_after_min": {"type": "integer", "minimum": 1},
+        "stale_margin_max_add_min": {"type": "integer", "minimum": 0},
+        "tracking_lost_after_min": {"type": "integer", "minimum": 1},
+        "risk_medium_from": {"type": "integer"},
+        "risk_high_from": {"type": "integer"}
+      }
+    },
+    "category_default_delay_min": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ACCIDENT", "BREAKDOWN", "WEATHER", "ROAD_CLOSURE", "LOADING_DELAY", "OTHER"],
+      "properties": {
+        "ACCIDENT": {"type": "integer", "minimum": 0},
+        "BREAKDOWN": {"type": "integer", "minimum": 0},
+        "WEATHER": {"type": "integer", "minimum": 0},
+        "ROAD_CLOSURE": {"type": "integer", "minimum": 0},
+        "LOADING_DELAY": {"type": "integer", "minimum": 0},
+        "OTHER": {"type": "integer", "minimum": 0}
+      }
+    },
+    "alerts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resolve_after_low_min"],
+      "properties": {"resolve_after_low_min": {"type": "integer", "minimum": 0}}
+    },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["valid_for_min", "improvement_threshold_min", "cost_per_km_inr", "standby_vehicle_cost_inr", "split_min_quantity_t"],
+      "properties": {
+        "valid_for_min": {"type": "integer", "minimum": 1},
+        "improvement_threshold_min": {"type": "integer", "minimum": 0},
+        "cost_per_km_inr": {"type": "number", "exclusiveMinimum": 0},
+        "standby_vehicle_cost_inr": {"type": "number", "minimum": 0},
+        "split_min_quantity_t": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cost_per_late_hour_inr"],
+      "properties": {"cost_per_late_hour_inr": {"type": "number", "exclusiveMinimum": 0}}
+    },
+    "invoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gst_pct", "default_rate_per_t_inr", "rates"],
+      "properties": {
+        "gst_pct": {"type": "number", "minimum": 0, "maximum": 100},
+        "default_rate_per_t_inr": {"type": "number", "exclusiveMinimum": 0},
+        "rates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["match", "rate_per_t_inr", "hsn"],
+            "properties": {
+              "match": {"type": "string", "minLength": 1},
+              "rate_per_t_inr": {"type": "number", "exclusiveMinimum": 0},
+              "hsn": {"type": "string", "pattern": "^[0-9]{4}$"}
+            }
+          }
+        }
+      }
+    },
+    "weather": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sample_every_km", "forecast_hours", "refresh_min", "moderate", "severe"],
+      "properties": {
+        "sample_every_km": {"type": "number", "exclusiveMinimum": 0},
+        "forecast_hours": {"type": "integer", "minimum": 1, "maximum": 24},
+        "refresh_min": {"type": "integer", "minimum": 1},
+        "moderate": {"$ref": "#/$defs/threshold"},
+        "severe": {"$ref": "#/$defs/threshold"}
+      }
+    },
+    "disruptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report_ahead_km"],
+      "properties": {"report_ahead_km": {"type": "number", "exclusiveMinimum": 0}}
+    },
+    "demo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["speed", "position_interval_min", "stale_tick_min"],
+      "properties": {
+        "speed": {"type": "number", "exclusiveMinimum": 0},
+        "position_interval_min": {"type": "integer", "minimum": 1},
+        "stale_tick_min": {"type": "integer", "minimum": 1}
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

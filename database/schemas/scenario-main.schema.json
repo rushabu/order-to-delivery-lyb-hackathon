@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scenario-main.schema.json",
+  "title": "scenario-main.json: live demo state at reset and the ground truth the simulator replays",
+  "$ref": "common.schema.json#/$defs/file",
+  "required": ["scenario_id", "day", "clock_start", "pause_at", "pause_labels", "standby_vehicles", "orders", "shipments",
+               "ground_truth", "scripted_events", "reference_human_events"],
+  "$defs": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disruption_id", "category"],
+      "properties": {
+        "disruption_id": {"$ref": "common.schema.json#/$defs/uuid"},
+        "category": {"$ref": "common.schema.json#/$defs/category"},
+        "expected_delay_min": {"type": "integer", "minimum": 1},
+        "at_km": {"type": "number", "minimum": 0},
+        "note": {"type": "string"}
+      }
+    },
+    "waypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["at", "km"],
+      "properties": {"at": {"$ref": "common.schema.json#/$defs/utc"}, "km": {"type": "number", "minimum": 0}}
+    },
+    "piece": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route_id", "from_km", "to_km", "speed_kmph"],
+      "properties": {
+        "route_id": {"type": "string"},
+        "from_km": {"type": "number", "minimum": 0},
+        "to_km": {"type": "number", "exclusiveMinimum": 0},
+        "speed_kmph": {"type": "number", "minimum": 5, "maximum": 80},
+        "note": {"type": "string"}
+      }
+    },
+    "branch_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["speed_profile", "incidents", "dwells"],
+      "properties": {
+        "speed_profile": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/piece"}},
+        "incidents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["route_id", "km", "category", "start", "clear"],
+            "properties": {
+              "route_id": {"type": "string"},
+              "km": {"type": "number"},
+              "category": {"$ref": "common.schema.json#/$defs/category"},
+              "start": {"$ref": "common.schema.json#/$defs/utc"},
+              "clear": {"$ref": "common.schema.json#/$defs/utc"}
+            }
+          }
+        },
+        "dwells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["route_id", "km", "minutes"],
+            "properties": {"route_id": {"type": "string"}, "km": {"type": "number"}, "minutes": {"type": "integer", "minimum": 1}}
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "scenario_id": {"const": "main"},
+    "day": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "clock_start": {"$ref": "common.schema.json#/$defs/utc"},
+    "pause_at": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/utc"}},
+    "pause_labels": {"type": "object", "additionalProperties": {"type": "string"}},
+    "standby_vehicles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["vehicle_reg", "transporter_id", "available", "vehicle_id"],
+        "properties": {
+          "vehicle_reg": {"$ref": "common.schema.json#/$defs/registration"},
+          "transporter_id": {"type": "string"},
+          "available": {"type": "boolean"},
+          "vehicle_id": {"type": "string"}
+        }
+      }
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "customer_id", "product", "quantity_t", "original_promised_by", "agreed_delivery_by"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^ORD-\\d{4}$"},
+          "customer_id": {"type": "string"},
+          "product": {"type": "string"},
+          "quantity_t": {"type": "number", "exclusiveMinimum": 0},
+          "original_promised_by": {"$ref": "common.schema.json#/$defs/utc"},
+          "agreed_delivery_by": {"$ref": "common.schema.json#/$defs/utc"}
+        }
+      }
+    },
+    "shipments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "order_id", "transporter_id", "driver_user_id", "vehicle_reg", "vehicle_id", "quantity_t", "gross_t",
+                     "status", "route_id", "planned_departure", "created_at", "milestones", "disruptions", "role_in_demo"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^SHP-\\d{4}$"},
+          "order_id": {"type": "string"},
+          "transporter_id": {"type": "string"},
+          "driver_user_id": {"type": ["string", "null"]},
+          "vehicle_reg": {"$ref": "common.schema.json#/$defs/registration"},
+          "vehicle_id": {"type": "string"},
+          "quantity_t": {"type": "number", "exclusiveMinimum": 0},
+          "gross_t": {"type": "number", "exclusiveMinimum": 0},
+          "loaded_t": {"type": "number", "minimum": 0},
+          "status": {"enum": ["PLANNED", "DISPATCHED", "IN_TRANSIT"]},
+          "route_id": {"type": "string"},
+          "planned_departure": {"$ref": "common.schema.json#/$defs/utc"},
+          "created_at": {"$ref": "common.schema.json#/$defs/utc"},
+          "milestones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["status", "at"],
+              "properties": {"status": {"enum": ["DISPATCHED", "IN_TRANSIT"]}, "at": {"$ref": "common.schema.json#/$defs/utc"}}
+            }
+          },
+          "disruptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "category", "at_km", "reported_at", "note", "reported_by"],
+              "properties": {
+                "id": {"$ref": "common.schema.json#/$defs/uuid"},
+                "category": {"$ref": "common.schema.json#/$defs/category"},
+                "at_km": {"type": ["number", "null"]},
+                "expected_delay_min": {"type": "integer", "minimum": 1},
+                "note": {"type": "string"},
+                "reported_at": {"$ref": "common.schema.json#/$defs/utc"},
+                "reported_by": {"type": "string"}
+              }
+            }
+          },
+          "role_in_demo": {"type": "string"}
+        }
+      }
+    },
+    "ground_truth": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["deliver_after_min", "common", "branches", "derived_from"],
+        "properties": {
+          "deliver_after_min": {"type": "integer", "minimum": 0},
+          "common": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/waypoint"}},
+          "branches": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "array", "items": {"$ref": "#/$defs/waypoint"}}},
+          "derived_from": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["departure", "base_route_id", "branch_km", "branches"],
+            "properties": {
+              "departure": {"$ref": "common.schema.json#/$defs/utc"},
+              "base_route_id": {"type": "string"},
+              "branch_km": {"type": "number"},
+              "branches": {"type": "object", "additionalProperties": {"$ref": "#/$defs/branch_source"}}
+            }
+          }
+        }
+      }
+    },
+    "scripted_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["at", "shipment_id", "type", "payload", "actor_user_id", "note"],
+        "properties": {
+          "at": {"$ref": "common.schema.json#/$defs/utc"},
+          "shipment_id": {"type": "string"},
+          "type": {"const": "DISRUPTION_REPORTED"},
+          "payload": {"$ref": "#/$defs/payload"},
+          "actor_user_id": {"type": "string"},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "reference_human_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["expected_around", "shipment_id", "actor_user_id", "note", "type", "event_id", "payload"],
+        "properties": {
+          "expected_around": {"$ref": "common.schema.json#/$defs/utc"},
+          "shipment_id": {"type": "string"},
+          "actor_user_id": {"type": "string"},
+          "note": {"type": "string"},
+          "type": {"const": "DISRUPTION_REPORTED"},
+          "event_id": {"$ref": "common.schema.json#/$defs/uuid"},
+          "payload": {"$ref": "#/$defs/payload"}
+        }
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

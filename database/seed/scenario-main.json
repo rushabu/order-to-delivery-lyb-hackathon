@@ -1,0 +1,463 @@
+{
+  "fictional": true,
+  "generated_by": "database/scripts/generate-seed.ts",
+  "seed": 20261116,
+  "schema_version": 1,
+  "note": "Live demo for 16 Nov 2026. Times are UTC; IST is UTC+5:30. ground_truth waypoints {at, km} are linear between points and are derived from derived_from (speed profiles, incidents, dwells) by the generator.",
+  "scenario_id": "main",
+  "day": "2026-11-16",
+  "clock_start": "2026-11-16T03:20:00Z",
+  "pause_at": [
+    "2026-11-16T03:45:00Z",
+    "2026-11-16T04:00:00Z"
+  ],
+  "pause_labels": {
+    "2026-11-16T03:45:00Z": "SHP-1001 risk turns MEDIUM; open the factor list",
+    "2026-11-16T04:00:00Z": "Driver of SHP-1001 reports the accident live; stay paused until the coordinator decides"
+  },
+  "standby_vehicles": [
+    {
+      "vehicle_reg": "MH 99 SB 5012",
+      "transporter_id": "TRN-01",
+      "available": true,
+      "vehicle_id": "VEH-S3"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-5001",
+      "customer_id": "CUS-01",
+      "product": "Polypropylene homopolymer, bagged",
+      "quantity_t": 24,
+      "original_promised_by": "2026-11-16T06:15:00Z",
+      "agreed_delivery_by": "2026-11-16T06:15:00Z"
+    },
+    {
+      "id": "ORD-5002",
+      "customer_id": "CUS-02",
+      "product": "HDPE pellets, bagged",
+      "quantity_t": 24,
+      "original_promised_by": "2026-11-16T07:30:00Z",
+      "agreed_delivery_by": "2026-11-16T07:30:00Z"
+    },
+    {
+      "id": "ORD-5003",
+      "customer_id": "CUS-02",
+      "product": "LLDPE film grade, bagged",
+      "quantity_t": 26,
+      "original_promised_by": "2026-11-16T09:15:00Z",
+      "agreed_delivery_by": "2026-11-16T09:15:00Z"
+    },
+    {
+      "id": "ORD-5004",
+      "customer_id": "CUS-01",
+      "product": "Polypropylene copolymer, bagged",
+      "quantity_t": 20,
+      "original_promised_by": "2026-11-17T07:30:00Z",
+      "agreed_delivery_by": "2026-11-17T07:30:00Z"
+    },
+    {
+      "id": "ORD-5005",
+      "customer_id": "CUS-02",
+      "product": "HDPE pellets, bagged",
+      "quantity_t": 22,
+      "original_promised_by": "2026-11-17T07:15:00Z",
+      "agreed_delivery_by": "2026-11-17T07:15:00Z"
+    }
+  ],
+  "shipments": [
+    {
+      "id": "SHP-1001",
+      "order_id": "ORD-5001",
+      "transporter_id": "TRN-01",
+      "driver_user_id": "USR-DRV-01",
+      "vehicle_id": "VEH-S1",
+      "quantity_t": 24,
+      "gross_t": 33.6,
+      "status": "IN_TRANSIT",
+      "route_id": "RTE-01",
+      "planned_departure": "2026-11-16T02:30:00Z",
+      "created_at": "2026-11-15T12:30:00Z",
+      "milestones": [
+        {
+          "status": "DISPATCHED",
+          "at": "2026-11-16T02:10:00Z"
+        },
+        {
+          "status": "IN_TRANSIT",
+          "at": "2026-11-16T02:30:00Z"
+        }
+      ],
+      "disruptions": [],
+      "role_in_demo": "Main story: predicted delay, then reroute",
+      "vehicle_reg": "MH 99 SB 4127"
+    },
+    {
+      "id": "SHP-1002",
+      "order_id": "ORD-5002",
+      "transporter_id": "TRN-02",
+      "driver_user_id": "USR-DRV-02",
+      "vehicle_id": "VEH-K1",
+      "quantity_t": 24,
+      "gross_t": 34,
+      "status": "IN_TRANSIT",
+      "route_id": "RTE-02",
+      "planned_departure": "2026-11-16T03:05:00Z",
+      "created_at": "2026-11-15T13:00:00Z",
+      "milestones": [
+        {
+          "status": "DISPATCHED",
+          "at": "2026-11-16T02:45:00Z"
+        },
+        {
+          "status": "IN_TRANSIT",
+          "at": "2026-11-16T03:05:00Z"
+        }
+      ],
+      "disruptions": [],
+      "role_in_demo": "Alternative route unavailable; agree a new time",
+      "vehicle_reg": "MH 99 KR 2291"
+    },
+    {
+      "id": "SHP-1003",
+      "order_id": "ORD-5003",
+      "transporter_id": "TRN-01",
+      "driver_user_id": "USR-DRV-03",
+      "vehicle_id": "VEH-S4",
+      "quantity_t": 26,
+      "gross_t": 36.6,
+      "loaded_t": 14,
+      "status": "PLANNED",
+      "route_id": "RTE-02",
+      "planned_departure": "2026-11-16T05:00:00Z",
+      "created_at": "2026-11-15T13:30:00Z",
+      "milestones": [],
+      "disruptions": [
+        {
+          "id": "6335e106-141a-4d1e-a6ac-0409e40ee743",
+          "category": "LOADING_DELAY",
+          "at_km": null,
+          "expected_delay_min": 60,
+          "reported_at": "2026-11-16T02:50:00Z",
+          "reported_by": "USR-DRV-03",
+          "note": "Bagging line fault at the loading bay; loading paused, about an hour"
+        }
+      ],
+      "role_in_demo": "Split-shipment case; used by tests, not shown in the four-minute demo",
+      "vehicle_reg": "MH 99 SB 5260"
+    },
+    {
+      "id": "SHP-1004",
+      "order_id": "ORD-5004",
+      "transporter_id": "TRN-01",
+      "driver_user_id": "USR-DRV-01",
+      "vehicle_id": "VEH-S2",
+      "quantity_t": 20,
+      "gross_t": 30.8,
+      "status": "PLANNED",
+      "route_id": "RTE-01",
+      "planned_departure": "2026-11-17T03:00:00Z",
+      "created_at": "2026-11-16T02:45:00Z",
+      "milestones": [],
+      "disruptions": [],
+      "role_in_demo": "Quiet: Deccan Mouldings, tomorrow",
+      "vehicle_reg": "MH 99 SB 4385"
+    },
+    {
+      "id": "SHP-1005",
+      "order_id": "ORD-5005",
+      "transporter_id": "TRN-02",
+      "driver_user_id": "USR-DRV-02",
+      "vehicle_id": "VEH-K2",
+      "quantity_t": 22,
+      "gross_t": 32.9,
+      "status": "PLANNED",
+      "route_id": "RTE-02",
+      "planned_departure": "2026-11-17T02:00:00Z",
+      "created_at": "2026-11-16T02:50:00Z",
+      "milestones": [],
+      "disruptions": [],
+      "role_in_demo": "Quiet: Godavari Flexipack, tomorrow",
+      "vehicle_reg": "MH 99 KR 2617"
+    }
+  ],
+  "ground_truth": {
+    "SHP-1001": {
+      "deliver_after_min": 15,
+      "common": [
+        {
+          "at": "2026-11-16T02:30:00Z",
+          "km": 0
+        },
+        {
+          "at": "2026-11-16T03:30:00Z",
+          "km": 40
+        },
+        {
+          "at": "2026-11-16T04:09:00Z",
+          "km": 66
+        }
+      ],
+      "branches": {
+        "RTE-01": [
+          {
+            "at": "2026-11-16T04:22:30Z",
+            "km": 75
+          },
+          {
+            "at": "2026-11-16T05:30:00Z",
+            "km": 75
+          },
+          {
+            "at": "2026-11-16T05:55:00Z",
+            "km": 100
+          },
+          {
+            "at": "2026-11-16T06:10:00Z",
+            "km": 100
+          },
+          {
+            "at": "2026-11-16T07:10:00Z",
+            "km": 150
+          }
+        ],
+        "RTE-01B": [
+          {
+            "at": "2026-11-16T05:21:00Z",
+            "km": 126
+          },
+          {
+            "at": "2026-11-16T05:31:00Z",
+            "km": 131
+          },
+          {
+            "at": "2026-11-16T06:13:00Z",
+            "km": 166
+          }
+        ]
+      },
+      "derived_from": {
+        "departure": "2026-11-16T02:30:00Z",
+        "base_route_id": "RTE-01",
+        "branch_km": 66,
+        "branches": {
+          "RTE-01": {
+            "speed_profile": [
+              {
+                "route_id": "RTE-01",
+                "from_km": 0,
+                "to_km": 40,
+                "speed_kmph": 40
+              },
+              {
+                "route_id": "RTE-01",
+                "from_km": 40,
+                "to_km": 75,
+                "speed_kmph": 40,
+                "note": "Slow traffic from km 40"
+              },
+              {
+                "route_id": "RTE-01",
+                "from_km": 75,
+                "to_km": 100,
+                "speed_kmph": 60
+              },
+              {
+                "route_id": "RTE-01",
+                "from_km": 100,
+                "to_km": 150,
+                "speed_kmph": 50
+              }
+            ],
+            "incidents": [
+              {
+                "route_id": "RTE-01",
+                "km": 75,
+                "category": "ACCIDENT",
+                "start": "2026-11-16T03:50:00Z",
+                "clear": "2026-11-16T05:30:00Z"
+              }
+            ],
+            "dwells": [
+              {
+                "route_id": "RTE-01",
+                "km": 100,
+                "minutes": 15
+              }
+            ]
+          },
+          "RTE-01B": {
+            "speed_profile": [
+              {
+                "route_id": "RTE-01",
+                "from_km": 0,
+                "to_km": 40,
+                "speed_kmph": 40
+              },
+              {
+                "route_id": "RTE-01",
+                "from_km": 40,
+                "to_km": 66,
+                "speed_kmph": 40,
+                "note": "Slow traffic from km 40"
+              },
+              {
+                "route_id": "RTE-01B",
+                "from_km": 66,
+                "to_km": 126,
+                "speed_kmph": 50
+              },
+              {
+                "route_id": "RTE-01B",
+                "from_km": 126,
+                "to_km": 131,
+                "speed_kmph": 30,
+                "note": "Town traffic through Wagholi"
+              },
+              {
+                "route_id": "RTE-01B",
+                "from_km": 131,
+                "to_km": 166,
+                "speed_kmph": 50
+              }
+            ],
+            "incidents": [],
+            "dwells": []
+          }
+        }
+      }
+    },
+    "SHP-1002": {
+      "deliver_after_min": 15,
+      "common": [
+        {
+          "at": "2026-11-16T03:05:00Z",
+          "km": 0
+        },
+        {
+          "at": "2026-11-16T04:14:00Z",
+          "km": 46
+        }
+      ],
+      "branches": {
+        "RTE-02": [
+          {
+            "at": "2026-11-16T05:23:00Z",
+            "km": 115
+          },
+          {
+            "at": "2026-11-16T06:30:00Z",
+            "km": 115
+          },
+          {
+            "at": "2026-11-16T07:10:00Z",
+            "km": 131
+          },
+          {
+            "at": "2026-11-16T07:22:00Z",
+            "km": 140
+          },
+          {
+            "at": "2026-11-16T07:32:00Z",
+            "km": 140
+          },
+          {
+            "at": "2026-11-16T08:12:00Z",
+            "km": 178
+          }
+        ]
+      },
+      "derived_from": {
+        "departure": "2026-11-16T03:05:00Z",
+        "base_route_id": "RTE-02",
+        "branch_km": 46,
+        "branches": {
+          "RTE-02": {
+            "speed_profile": [
+              {
+                "route_id": "RTE-02",
+                "from_km": 0,
+                "to_km": 46,
+                "speed_kmph": 40
+              },
+              {
+                "route_id": "RTE-02",
+                "from_km": 46,
+                "to_km": 115,
+                "speed_kmph": 60
+              },
+              {
+                "route_id": "RTE-02",
+                "from_km": 115,
+                "to_km": 131,
+                "speed_kmph": 24,
+                "note": "Wet ghat road after the hold"
+              },
+              {
+                "route_id": "RTE-02",
+                "from_km": 131,
+                "to_km": 140,
+                "speed_kmph": 45
+              },
+              {
+                "route_id": "RTE-02",
+                "from_km": 140,
+                "to_km": 178,
+                "speed_kmph": 57
+              }
+            ],
+            "incidents": [
+              {
+                "route_id": "RTE-02",
+                "km": 115,
+                "category": "WEATHER",
+                "start": "2026-11-16T03:30:00Z",
+                "clear": "2026-11-16T06:30:00Z"
+              }
+            ],
+            "dwells": [
+              {
+                "route_id": "RTE-02",
+                "km": 140,
+                "minutes": 10
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "scripted_events": [
+    {
+      "at": "2026-11-16T03:50:00Z",
+      "shipment_id": "SHP-1002",
+      "type": "DISRUPTION_REPORTED",
+      "payload": {
+        "disruption_id": "9f857ef7-0fde-4af4-8f61-1f24f3b3611b",
+        "category": "WEATHER",
+        "expected_delay_min": 60,
+        "at_km": 115,
+        "note": "Heavy rain; traffic being held at Kasara ghat, about an hour"
+      },
+      "actor_user_id": "USR-DRV-02",
+      "note": "Nobody drives SHP-1002 in the demo, so its driver report is played by the simulator: the one exception to \"the simulator supplies positions only\" (DESIGN.md section 10.4)."
+    }
+  ],
+  "reference_human_events": [
+    {
+      "expected_around": "2026-11-16T04:00:00Z",
+      "shipment_id": "SHP-1001",
+      "actor_user_id": "USR-DRV-01",
+      "note": "Made live by the presenter on the driver screen. Reference only; the simulator never sends it.",
+      "type": "DISRUPTION_REPORTED",
+      "event_id": "5f0c2c1e-8a4b-4f6d-9a57-2f3f1f0b7a11",
+      "payload": {
+        "disruption_id": "9b1d6c70-3c55-4f0e-8d0a-6f1f5a2c4e22",
+        "category": "ACCIDENT",
+        "expected_delay_min": 60,
+        "at_km": 75,
+        "note": "Accident ahead, one lane closed"
+      }
+    }
+  ]
+}

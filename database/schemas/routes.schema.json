@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "routes.schema.json",
+  "title": "routes.json: routes with segments, calibrated geometry, and the alternatives between them",
+  "$ref": "common.schema.json#/$defs/file",
+  "required": ["routes", "alternatives"],
+  "properties": {
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "origin", "destination", "destination_customer_id", "total_km", "geometry",
+                     "restrictions", "segments", "landmarks", "geometry_source"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^RTE-\\d{2}B?$"},
+          "name": {"type": "string"},
+          "origin": {"type": "string"},
+          "destination": {"type": "string"},
+          "destination_customer_id": {"type": "string"},
+          "total_km": {"type": "number", "exclusiveMinimum": 0},
+          "geometry": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "coordinates", "chainage_km"],
+            "properties": {
+              "type": {"const": "LineString"},
+              "coordinates": {
+                "type": "array",
+                "minItems": 20,
+                "maxItems": 60,
+                "items": {
+                  "type": "array",
+                  "prefixItems": [{"$ref": "common.schema.json#/$defs/lng"}, {"$ref": "common.schema.json#/$defs/lat"}],
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "chainage_km": {"type": "array", "minItems": 20, "maxItems": 60, "items": {"type": "number", "minimum": 0}}
+            }
+          },
+          "restrictions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["max_gross_t", "closed", "note"],
+            "properties": {
+              "max_gross_t": {"type": ["number", "null"]},
+              "closed": {"type": "boolean"},
+              "note": {"type": ["string", "null"]}
+            }
+          },
+          "segments": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["seq", "start_km", "end_km", "baseline_speed_kmph", "dwell_after_min"],
+              "properties": {
+                "seq": {"type": "integer", "minimum": 1},
+                "start_km": {"type": "number", "minimum": 0},
+                "end_km": {"type": "number", "exclusiveMinimum": 0},
+                "baseline_speed_kmph": {"type": "number", "minimum": 10, "maximum": 80},
+                "dwell_after_min": {"type": "integer", "minimum": 0}
+              }
+            }
+          },
+          "landmarks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["km", "label"],
+              "properties": {"km": {"type": "number", "minimum": 0}, "label": {"type": "string"}}
+            }
+          },
+          "geometry_source": {"type": "string"}
+        }
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["route_id", "alt_route_id", "exit_km"],
+        "properties": {
+          "route_id": {"type": "string"},
+          "alt_route_id": {"type": "string"},
+          "exit_km": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

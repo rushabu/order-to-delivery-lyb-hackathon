@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "history.schema.json",
+  "title": "history.json: delivered shipments for the dashboard",
+  "$ref": "common.schema.json#/$defs/file",
+  "required": ["shipments"],
+  "properties": {
+    "shipments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["shipment_id", "order_id", "customer_id", "transporter_id", "route_id", "product", "quantity_t", "gross_t",
+                     "vehicle_reg", "planned_departure", "original_promised_by", "actual_arrival", "delay_causes",
+                     "driver_user_id", "vehicle_id", "planned_arrival", "lateness_min", "on_time", "primary_cause"],
+        "properties": {
+          "shipment_id": {"type": "string", "pattern": "^SHP-\\d{4}$"},
+          "order_id": {"type": "string", "pattern": "^ORD-\\d{4}$"},
+          "customer_id": {"type": "string"},
+          "transporter_id": {"type": "string"},
+          "route_id": {"type": "string"},
+          "product": {"type": "string"},
+          "quantity_t": {"type": "number", "minimum": 16, "maximum": 28},
+          "gross_t": {"type": "number"},
+          "vehicle_reg": {"$ref": "common.schema.json#/$defs/registration"},
+          "planned_departure": {"$ref": "common.schema.json#/$defs/utc"},
+          "original_promised_by": {"$ref": "common.schema.json#/$defs/utc"},
+          "actual_arrival": {"$ref": "common.schema.json#/$defs/utc"},
+          "delay_causes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cause", "minutes"],
+              "properties": {
+                "cause": {"$ref": "common.schema.json#/$defs/cause"},
+                "minutes": {"type": "integer", "minimum": 1}
+              }
+            }
+          },
+          "driver_user_id": {"type": "string"},
+          "vehicle_id": {"type": "string"},
+          "planned_arrival": {"$ref": "common.schema.json#/$defs/utc"},
+          "lateness_min": {"type": "integer"},
+          "on_time": {"type": "boolean"},
+          "primary_cause": {"anyOf": [{"$ref": "common.schema.json#/$defs/cause"}, {"type": "null"}]}
+        }
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "customers.schema.json",
+  "title": "customers.json: fictional business customers",
+  "$ref": "common.schema.json#/$defs/file",
+  "required": ["customers"],
+  "properties": {
+    "customers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "delivery_lat", "delivery_lng", "city", "delivery_label", "receiving_window"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^CUS-\\d{2}$"},
+          "name": {"type": "string", "minLength": 1},
+          "delivery_lat": {"$ref": "common.schema.json#/$defs/lat"},
+          "delivery_lng": {"$ref": "common.schema.json#/$defs/lng"},
+          "city": {"type": "string"},
+          "delivery_label": {"type": "string"},
+          "receiving_window": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["days", "opens_local", "closes_local", "timezone"],
+            "properties": {
+              "days": {"const": "MON-SAT"},
+              "opens_local": {"$ref": "common.schema.json#/$defs/local_time"},
+              "closes_local": {"$ref": "common.schema.json#/$defs/local_time"},
+              "timezone": {"const": "Asia/Kolkata"}
+            }
+          }
+        }
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

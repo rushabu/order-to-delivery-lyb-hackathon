@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "transporters.schema.json",
+  "title": "transporters.json: fictional haulage companies and their vehicles",
+  "$ref": "common.schema.json#/$defs/file",
+  "required": ["transporters"],
+  "properties": {
+    "transporters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "base", "vehicles"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^TRN-\\d{2}$"},
+          "name": {"type": "string"},
+          "base": {"type": "string"},
+          "vehicles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "registration", "body", "payload_capacity_t", "tare_t", "standby"],
+              "properties": {
+                "id": {"type": "string", "pattern": "^VEH-[A-Z]\\d$"},
+                "registration": {"$ref": "common.schema.json#/$defs/registration"},
+                "body": {"enum": ["10-wheeler", "12-wheeler", "14-wheeler"]},
+                "payload_capacity_t": {"type": "number", "minimum": 10, "maximum": 35},
+                "tare_t": {"type": "number", "minimum": 6, "maximum": 13},
+                "standby": {"type": "boolean"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}
