@@ -97,6 +97,7 @@ export function ShipmentDetailPage() {
         <div className="min-w-0 space-y-5 lg:col-span-7 xl:col-span-8">
           <Card aria-labelledby="map-h">
             <CardHeader title="Route and position" id="map-h">
+              <p className="mb-2 text-body font-semibold">{routes[s.active_route_id]?.name ?? s.active_route_id}</p>
               <MapLegend rerouted={s.active_route_id !== s.planned_route_id} />
             </CardHeader>
             <div className="p-4">

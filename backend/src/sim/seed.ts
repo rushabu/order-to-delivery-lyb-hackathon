@@ -47,7 +47,7 @@ function insertFixtureUser(db: Ctx['db'], u: Fixtures['users'][number]) {
 }
 
 /** Add missing catalog entries to an existing demo database without replacing accounts or orders. */
-export function addDemoCustomers(ctx: Ctx): void {
+export function addDemoCatalog(ctx: Ctx): void {
   const { db, fixtures } = ctx;
   db.transaction(() => {
     const insert = db.prepare('INSERT INTO customers VALUES (?, ?, ?, ?) ON CONFLICT(id) DO NOTHING');
@@ -56,7 +56,23 @@ export function addDemoCustomers(ctx: Ctx): void {
     for (const u of fixtures.users) {
       if (u.role === 'CUSTOMER' && !exists.get(u.id, u.email.toLowerCase())) insertFixtureUser(db, u);
     }
+    insertRoutes(ctx);
+    const addAlternative = db.prepare('INSERT INTO route_alternatives VALUES (?, ?, ?) ON CONFLICT DO NOTHING');
+    for (const a of fixtures.alternatives) addAlternative.run(a.route_id, a.alt_route_id, a.exit_km);
   })();
+}
+
+function insertRoutes({ db, fixtures }: Ctx): void {
+  const insert = db.prepare(`INSERT INTO routes (id, name, origin, destination, total_km, geometry, max_gross_t, closed)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING`);
+  const insertSegment = db.prepare('INSERT INTO route_segments VALUES (?, ?, ?, ?, ?, ?)');
+  for (const r of fixtures.routes) {
+    const result = insert.run(r.id, r.name, r.origin, r.destination, r.total_km, r.geometry ? JSON.stringify(r.geometry) : null,
+      r.restrictions.max_gross_t ?? null, r.restrictions.closed ? 1 : 0);
+    if (result.changes) {
+      for (const s of r.segments) insertSegment.run(r.id, s.seq, s.start_km, s.end_km, s.baseline_speed_kmph, s.dwell_after_min);
+    }
+  }
 }
 
 export function seedDatabase(ctx: Ctx, actorUserId: string | null): void {
@@ -73,16 +89,7 @@ export function seedDatabase(ctx: Ctx, actorUserId: string | null): void {
     for (const c of f.customers) ins('INSERT INTO customers VALUES (?, ?, ?, ?)', c.id, c.name, c.delivery_lat, c.delivery_lng);
     for (const t of f.transporters) ins('INSERT INTO transporters VALUES (?, ?)', t.id, t.name);
     for (const u of f.users) insertFixtureUser(db, u);
-    for (const r of f.routes) {
-      ins(
-        'INSERT INTO routes (id, name, origin, destination, total_km, geometry, max_gross_t, closed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        r.id, r.name, r.origin, r.destination, r.total_km, r.geometry ? JSON.stringify(r.geometry) : null,
-        r.restrictions.max_gross_t ?? null, r.restrictions.closed ? 1 : 0,
-      );
-      for (const s of r.segments) {
-        ins('INSERT INTO route_segments VALUES (?, ?, ?, ?, ?, ?)', r.id, s.seq, s.start_km, s.end_km, s.baseline_speed_kmph, s.dwell_after_min);
-      }
-    }
+    insertRoutes(ctx);
     for (const a of f.alternatives) ins('INSERT INTO route_alternatives VALUES (?, ?, ?)', a.route_id, a.alt_route_id, a.exit_km);
     for (const v of sc.standby_vehicles) ins('INSERT INTO standby_vehicles VALUES (?, ?, ?)', v.vehicle_reg, v.transporter_id, v.available ? 1 : 0);
     if (ctx.config.seedSampleOrders === false) return;

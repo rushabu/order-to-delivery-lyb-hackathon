@@ -97,6 +97,7 @@ export function RouteAndAlerts({ s, routes }: { s: ShipmentDetail; routes: Retur
         Route and alerts
       </h2>
       <div className="p-3">
+        <p className="mb-2 text-body font-semibold">{routes[s.active_route_id]?.name ?? s.active_route_id}</p>
         <ShipmentRoadMap
           shipment={s}
           label={`Map of trip ${s.id} to ${s.destination_name}`}

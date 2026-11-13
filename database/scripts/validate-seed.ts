@@ -128,7 +128,8 @@ const routeGeometry: Rule = (d) => {
       if (r && !(a.exit_km > 0 && a.exit_km < r.total_km)) errs.push(`${a.route_id}->${a.alt_route_id}: exit_km outside ${id}`);
     }
   }
-  if (new Set([...routes.values()].map((r) => JSON.stringify(r.geometry.coordinates[0]) + r.origin)).size !== 1) errs.push('routes do not share one Plant X origin');
+  if (new Set([...routes.values()].filter((r) => r.restrictions.max_gross_t !== 3.5)
+    .map((r) => JSON.stringify(r.geometry.coordinates[0]) + r.origin)).size !== 1) errs.push('regional routes do not share one Plant X origin');
   return errs;
 };
 

@@ -11,7 +11,7 @@ import { Health } from './http/schemas';
 import { InAppNotifier } from './notify/notifier';
 import { RealClock, SimulatedClock } from './sim/clock';
 import { loadFixtures } from './sim/fixtures';
-import { addDemoCustomers, seedDatabase } from './sim/seed';
+import { addDemoCatalog, seedDatabase } from './sim/seed';
 import { Simulator } from './sim/simulator';
 import { StreamHub } from './stream/hub';
 import { registerAuthRoutes } from './auth/routes';
@@ -80,7 +80,7 @@ export async function buildApp(opts: BuildOptions): Promise<Built> {
   // Demo mode always starts from the seed; otherwise seed only an empty database.
   if (sim) sim.reset(null);
   else if (!db.prepare('SELECT 1 FROM users LIMIT 1').get()) seedDatabase(ctx, null);
-  else if (config.demoMode) addDemoCustomers(ctx);
+  else if (config.demoMode) addDemoCatalog(ctx);
 
   // 8 MB body limit: a 5 MB delivery photo or invoice arrives base64-encoded (about a third larger).
   const app = Fastify({ logger: opts.logger ?? false, trustProxy: true, bodyLimit: 8 * 1024 * 1024 });

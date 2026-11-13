@@ -77,7 +77,7 @@ describe('endpoint and ETA on the real seed', () => {
     const r = await t.req('GET', '/weather/routes', c);
     expect(r.status).toBe(200);
     expect(r.body.mode).toBe('ADVISORY');
-    expect(r.body.routes.map((x: any) => x.route_id).sort()).toEqual(['RTE-01', 'RTE-01B', 'RTE-02', 'RTE-02B']);
+    expect(r.body.routes.map((x: any) => x.route_id).sort()).toEqual(['RTE-01', 'RTE-01B', 'RTE-02', 'RTE-02B', 'RTE-03', 'RTE-04', 'RTE-05']);
     expect(r.body.routes[0].level).toBe('SEVERE');
     await t.req('POST', '/demo/scenarios/main/start', c);
     t.advanceTo(T['09:15']);

@@ -290,6 +290,11 @@ export function registerShipmentRoutes(app: FastifyInstance, ctx: Ctx, reg: Regi
     responses: { 200: RouteDetail, 404: ErrorResponse },
     handler: ({ user, params }) => {
       const visible = new Set<string>();
+      if (user!.role === 'CUSTOMER') {
+        for (const route of ctx.fixtures.routes) {
+          if (route.destination_customer_id === user!.customer_id) visible.add(route.id);
+        }
+      }
       for (const s of listVisibleShipments(db, user!)) {
         visible.add(s.planned_route_id);
         visible.add(s.active_route_id);

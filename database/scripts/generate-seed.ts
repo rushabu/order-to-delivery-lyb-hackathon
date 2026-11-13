@@ -129,6 +129,7 @@ function buildTransporters() {
           vehicle('VEH-S3', 'MH 99 SB 5012', '12-wheeler', 25, 9.4, true),
           vehicle('VEH-S4', 'MH 99 SB 5260', '14-wheeler', 28, 10.6),
           vehicle('VEH-S5', 'MH 99 SB 6131', '10-wheeler', 20, 8.4),
+          vehicle('VEH-S6', 'MH 99 SB 6140', 'Delivery van', 1.4, 2.1),
         ],
       },
       {
@@ -138,6 +139,7 @@ function buildTransporters() {
           vehicle('VEH-K2', 'MH 99 KR 2617', '14-wheeler', 28, 10.9),
           vehicle('VEH-K3', 'MH 99 KR 3048', '10-wheeler', 20, 8.2),
           vehicle('VEH-K4', 'MH 99 KR 3315', '12-wheeler', 25, 9.8),
+          vehicle('VEH-K5', 'MH 99 KR 3320', 'Delivery van', 1.4, 2.1),
         ],
       },
     ],
@@ -548,13 +550,20 @@ export function generate(outDir: string = SEED_DIR): string[] {
   mkdirSync(outDir, { recursive: true });
   const rng = new Rng(SEED);
   const routes = buildRoutes();
+  const customers = buildCustomers(routes);
+  const orderRoutes = Object.values(readJson(join(SOURCES, 'order_route_geometry.json'))) as (typeof routes)[string][];
+  for (const route of orderRoutes) {
+    const site = customers.customers.find((customer) => customer.id === route.destination_customer_id)!;
+    route.geometry.coordinates[route.geometry.coordinates.length - 1] = [site.delivery_lng, site.delivery_lat];
+    if (route.restrictions.max_gross_t !== 3.5) route.geometry.coordinates[0] = routes['RTE-01'].geometry.coordinates[0];
+  }
   const transporters = buildTransporters();
   const files: Record<string, unknown> = {
     'config.json': buildConfig(),
-    'customers.json': buildCustomers(routes),
+    'customers.json': customers,
     'transporters.json': transporters,
     'users.json': buildUsers(rng),
-    'routes.json': { ...header(), note: 'Fictional routes on real roads. geometry.chainage_km gives the km of each vertex (database/README.md).', routes: Object.values(routes), alternatives: ALTERNATIVES },
+    'routes.json': { ...header(), note: 'Fictional routes on real roads. geometry.chainage_km gives the km of each vertex (database/README.md).', routes: [...Object.values(routes), ...orderRoutes], alternatives: ALTERNATIVES },
     'history.json': buildHistory(rng, transporters),
     'scenario-main.json': buildScenario(rng, transporters),
   };

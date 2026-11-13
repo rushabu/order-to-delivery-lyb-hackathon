@@ -8,13 +8,38 @@ import { COORD, CUST1, DRIVER1, makeApp, uuid, type TestApp } from './helpers';
 const DRIVER3 = 'USR-DRV-03';
 const leave = () => ({ event_id: uuid(), type: 'MILESTONE', payload: { to_status: 'IN_TRANSIT' } });
 
+it.each([
+  ['USR-CUST-01', 'CUS-01', ['RTE-01', 'RTE-01B'], 6],
+  ['USR-CUST-03', 'CUS-02', ['RTE-02', 'RTE-02B'], 6],
+  ['USR-CUST-04', 'CUS-03', ['RTE-03'], 0.6],
+  ['USR-CUST-05', 'CUS-04', ['RTE-04'], 0.6],
+  ['USR-CUST-06', 'CUS-05', ['RTE-05'], 6],
+] as const)('can book each configured road for %s with no preloaded orders', async (user, customer_id, routes, quantity_t) => {
+  const app = await makeApp({ seedSampleOrders: false }, REAL_FIXTURES_DIR);
+  try {
+    const token = await app.login(user);
+    expect((await app.req('GET', '/shipments', token)).body).toEqual([]);
+    const form = (await app.req('GET', '/orders/new', token)).body;
+    expect(form.routes.map((r: { id: string }) => r.id)).toEqual(routes);
+    for (const route_id of routes) {
+      expect((await app.req('GET', `/routes/${route_id}`, token)).status).toBe(200);
+      const draft = { customer_id, route_id, quantity_t, product: form.products[0], promised_by: new Date(Date.now() + 86_400_000).toISOString() };
+      const plan = await app.req('POST', '/orders/plan', token, draft);
+      expect(plan.body.recommended_option_id).toBeTruthy();
+      const created = await app.req('POST', '/orders', token, { ...draft, option_id: plan.body.recommended_option_id });
+      expect(created.status).toBe(201);
+      expect((await app.req('GET', `/shipments/${created.body.shipment_id}`, token)).body.active_route_id).toBe(route_id);
+    }
+  } finally { await app.close(); }
+});
+
 it('starts without sample orders and takes a new order on the chosen original route from planning to departure', async () => {
   const app = await makeApp({ seedSampleOrders: false }, REAL_FIXTURES_DIR);
   try {
     const c = await app.login(COORD);
     expect((await app.req('GET', '/shipments', c)).body).toEqual([]);
     const form = (await app.req('GET', '/orders/new', c)).body;
-    expect(form.routes.map((r: { id: string }) => r.id)).toEqual(['RTE-01', 'RTE-01B', 'RTE-02', 'RTE-02B']);
+    expect(form.routes.map((r: { id: string }) => r.id)).toEqual(['RTE-01', 'RTE-01B', 'RTE-02', 'RTE-02B', 'RTE-03', 'RTE-04', 'RTE-05']);
     expect(form.products.length).toBeGreaterThan(0);
     const draft = { customer_id: 'CUS-01', route_id: 'RTE-01B', product: form.products[0], quantity_t: 6,
       promised_by: new Date(Date.now() + 86_400_000).toISOString() };

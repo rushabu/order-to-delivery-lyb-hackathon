@@ -91,6 +91,7 @@ export function DeliveryDetail() {
           <div className="mb-4 px-1">
             <JourneyBar from={routes[s.planned_route_id]?.origin ?? "Plant X"} to={s.destination_name} progressKm={s.last_position?.progress_km ?? null} totalKm={routes[s.active_route_id]?.total_km ?? null} status={s.status} />
           </div>
+          <p className="mb-2 text-body font-semibold">{routes[s.active_route_id]?.name ?? s.active_route_id}</p>
           <ShipmentRoadMap
             shipment={s}
             label={`Map of order ${s.order.id}. ${positionText(s, routes[s.active_route_id])}`}

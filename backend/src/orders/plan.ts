@@ -70,6 +70,7 @@ export interface DriverPlan {
 }
 
 interface Vehicle {
+  body?: string;
   registration: string;
   transporter_id: string;
   payload_capacity_t: number;
@@ -177,7 +178,8 @@ function newTrucks(ctx: Ctx, input: OrderInput, fleet: Vehicle[], now: string): 
     const option = { ...blank(`NEW-${d.id}`, 'NEW_TRUCK', `Separate truck with ${d.name}`), driver_name: d.name, transporter_name: transporterName(db, d.transporter_id) };
     if (!route) return { ...option, infeasible_reason: 'No route to this customer is set up' };
     const available = fleet
-      .filter((v) => v.transporter_id === d.transporter_id && !v.standby && !busy.has(v.registration) && !taken.has(v.registration) && v.payload_capacity_t >= input.quantity_t)
+      .filter((v) => v.transporter_id === d.transporter_id && !v.standby && !busy.has(v.registration) && !taken.has(v.registration)
+        && v.payload_capacity_t >= input.quantity_t && (v.body !== 'Delivery van' || (route.restrictions.max_gross_t ?? Infinity) <= 3.5))
       .sort((a, b) => a.payload_capacity_t - b.payload_capacity_t || a.registration.localeCompare(b.registration));
     const vehicle = available.find((v) => round1(v.tare_t + input.quantity_t) <= (route.restrictions.max_gross_t ?? Infinity));
     if (!vehicle) return { ...option, infeasible_reason: available.length

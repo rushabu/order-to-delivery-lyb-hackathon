@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { ArrowRight, CheckCircle, Prohibit } from "@phosphor-icons/react";
-import { useCreateOrder, useNewOrderForm, usePlanOrder } from "../../api/queries";
+import { useCreateOrder, useNewOrderForm, usePlanOrder, useRoute } from "../../api/queries";
 import type { OrderDraft, TruckOption } from "../../api/contract";
 import { Button, Card, CardHeader, EmptyState, ErrorNote, Loading, Skeleton } from "../../components/ui";
-import { isMocked } from "../../lib/env";
+import { DEMO_MODE, isMocked } from "../../lib/env";
+import { ShipmentMap } from "../../components/ShipmentMap";
 import { useSession } from "../../auth/session";
 import { dateTimeTz, duration, inr } from "../../lib/time";
 
@@ -37,9 +38,14 @@ export function NewOrder() {
   const [customerId, setCustomerId] = useState("");
   const [routeId, setRouteId] = useState("");
   const [product, setProduct] = useState("");
-  const [quantity, setQuantity] = useState("6");
+  const [quantity, setQuantity] = useState("");
   const [promise, setPromise] = useState("");
   const [planned, setPlanned] = useState<OrderDraft | null>(null);
+  const routes = form.data?.routes?.filter((r) => r.customer_id === customerId) ?? [];
+  const selectedRoute = routes.find((r) => r.id === routeId) ?? routes[0];
+  const vanRoute = selectedRoute?.max_gross_t === 3.5;
+  const orderQuantity = quantity || (vanRoute ? "0.6" : "6");
+  const routePreview = useRoute(selectedRoute?.id);
 
   useEffect(() => {
     if (!form.data) return;
@@ -64,9 +70,7 @@ export function NewOrder() {
     );
   }
 
-  const qty = Number(quantity);
-  const routes = form.data?.routes?.filter((r) => r.customer_id === customerId) ?? [];
-  const selectedRoute = routes.find((r) => r.id === routeId) ?? routes[0];
+  const qty = Number(orderQuantity);
   const valid = customerId !== "" && product.trim() !== "" && qty > 0 && qty <= 40 && promise !== "";
   const done = create.data;
 
@@ -80,13 +84,17 @@ export function NewOrder() {
     };
   }
 
-  function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  function checkRoute(id = selectedRoute?.id) {
     if (!valid || plan.isPending) return;
-    const draft: OrderDraft = { customer_id: customerId, ...(selectedRoute && { route_id: selectedRoute.id }),
+    const draft: OrderDraft = { customer_id: customerId, ...(id && { route_id: id }),
       product: product.trim(), quantity_t: qty, promised_by: istInputToIso(promise) };
     create.reset();
     plan.mutate(draft, { onSuccess: () => setPlanned(draft) });
+  }
+
+  function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    checkRoute();
   }
 
   function startAgain() {
@@ -136,6 +144,28 @@ export function NewOrder() {
         </Card>
       ) : (
         <>
+          {form.data.routes && !asCustomer && (
+            <details open className="rounded-lg border border-line bg-surface p-4">
+              <summary className="cursor-pointer font-semibold">All order routes</summary>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                {form.data.customers.map((site) => <div key={site.id}>
+                  <p className="font-semibold">{site.deliver_to ?? site.name}</p>
+                  <ul className="mt-1 space-y-1 text-body">
+                    {form.data.routes?.filter((r) => r.customer_id === site.id).map((r) => (
+                      <li key={r.id}>
+                        <button type="button" className="text-left underline underline-offset-2" onClick={() => {
+                          setCustomerId(site.id);
+                          edited(setRouteId)(r.id);
+                        }}>{r.name} ({r.id})</button>
+                        <span className="text-meta text-muted"> · {r.total_km} km{r.max_gross_t !== null && ` · ${r.max_gross_t} t gross limit`}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>)}
+              </div>
+              {DEMO_MODE && <Link to="/coordinator/demo" className="mt-3 inline-block text-body underline">Live routing demo</Link>}
+            </details>
+          )}
           <Card aria-labelledby="order-h">
             <CardHeader title="Order" id="order-h" />
             <form onSubmit={onSubmit} className="grid grid-cols-1 gap-x-8 gap-y-6 p-5 sm:grid-cols-2 sm:p-6">
@@ -163,6 +193,12 @@ export function NewOrder() {
                   </option>)}
                 </select>
               </label>}
+              {selectedRoute && <div className="sm:col-span-2">
+                <p className="mb-2 text-meta text-muted">{selectedRoute.name} · {selectedRoute.total_km} km{selectedRoute.max_gross_t !== null && ` · ${selectedRoute.max_gross_t} t gross limit (truck plus cargo)`}</p>
+                {routePreview.data?.geometry && <ShipmentMap routes={[{ route: routePreview.data, style: "active" }]}
+                  markers={[]} className="h-[220px]" label={`Route map for ${selectedRoute.name}`} />}
+                {routePreview.error && <ErrorNote what="the route map" error={routePreview.error} onRetry={() => routePreview.refetch()} />}
+              </div>}
               <label className={LABEL} htmlFor="order-product">
                 Product
                 <select id="order-product" className={FIELD} value={product} onChange={(e) => edited(setProduct)(e.target.value)}>
@@ -173,7 +209,7 @@ export function NewOrder() {
               </label>
               <label className={LABEL} htmlFor="order-qty">
                 Quantity (tonnes)
-                <input id="order-qty" type="number" min={0.5} max={40} step={0.5} required className={FIELD} value={quantity} onChange={(e) => edited(setQuantity)(e.target.value)} />
+                <input id="order-qty" type="number" min={vanRoute ? 0.1 : 0.5} max={40} step={vanRoute ? 0.1 : 0.5} required className={FIELD} value={orderQuantity} onChange={(e) => edited(setQuantity)(e.target.value)} />
               </label>
               <label className={LABEL} htmlFor="order-promise">
                 Promised delivery (IST)
@@ -194,7 +230,16 @@ export function NewOrder() {
 
           {planned && plan.data && (
             <Card aria-labelledby="trucks-h">
-              <CardHeader title={asCustomer ? "Drivers free now" : "Trucks for this order"} id="trucks-h" />
+              <CardHeader title={selectedRoute ? `Truck options for ${selectedRoute.name}` : asCustomer ? "Drivers free now" : "Trucks for this order"} id="trucks-h" />
+              {plan.data.routes && <div className="flex flex-wrap gap-2 px-5 pt-4" aria-label="Route availability for this load">
+                {routes.map((route) => {
+                  const count = plan.data.routes?.find((r) => r.id === route.id)?.eligible_options ?? 0;
+                  return <Button key={route.id} size="sm" aria-pressed={route.id === selectedRoute?.id}
+                    disabled={plan.isPending || create.isPending} onClick={() => { setRouteId(route.id); checkRoute(route.id); }}>
+                    {route.name} · {count} eligible
+                  </Button>;
+                })}
+              </div>}
               {create.error && (
                 <div className="px-5 pt-4">
                   <ErrorNote what="the order" error={create.error} onRetry={() => plan.mutate(planned)} />
@@ -204,7 +249,7 @@ export function NewOrder() {
                 <p className="px-5 pt-4 text-body text-ink-2">
                   {asCustomer
                     ? "No driver is free for this order right now. Try a smaller quantity or a later time, or ask Plant X."
-                    : "No truck can take this order as entered. Change the quantity or the promised time and check again."}
+                    : "No truck can take this load on the selected route. Check another route above or reduce the quantity."}
                 </p>
               )}
               {asCustomer ? (

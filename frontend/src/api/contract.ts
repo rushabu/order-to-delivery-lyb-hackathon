@@ -446,7 +446,7 @@ export interface NewOrderForm {
   now: string;
   customers: { id: string; name: string; deliver_to: string | null }[];
   products: string[];
-  routes?: { id: string; customer_id: string; name: string; max_gross_t: number | null }[];
+  routes?: { id: string; customer_id: string; name: string; total_km: number; max_gross_t: number | null }[];
 }
 export interface OrderDraft {
   customer_id: string;
@@ -478,6 +478,7 @@ export interface TruckOption {
   note: string | null;
 }
 export interface OrderPlan {
+  routes?: { id: string; eligible_options: number }[];
   options: TruckOption[];
   recommended_option_id: string | null;
 }

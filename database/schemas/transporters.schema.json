@@ -26,9 +26,9 @@
               "properties": {
                 "id": {"type": "string", "pattern": "^VEH-[A-Z]\\d$"},
                 "registration": {"$ref": "common.schema.json#/$defs/registration"},
-                "body": {"enum": ["10-wheeler", "12-wheeler", "14-wheeler"]},
-                "payload_capacity_t": {"type": "number", "minimum": 10, "maximum": 35},
-                "tare_t": {"type": "number", "minimum": 6, "maximum": 13},
+                  "body": {"enum": ["10-wheeler", "12-wheeler", "14-wheeler", "Delivery van"]},
+                  "payload_capacity_t": {"type": "number", "minimum": 1, "maximum": 35},
+                  "tare_t": {"type": "number", "minimum": 2, "maximum": 13},
                 "standby": {"type": "boolean"}
               }
             }

@@ -46,7 +46,12 @@ export function LiveRouteControls() {
               <select id="live-preset" value={draft.preset_id ?? ""} disabled={busy} className="h-10 rounded-md border border-line bg-surface px-2 text-body"
                 onChange={(event) => { setSelection(presets.find((item) => item.preset_id === event.target.value)); start.reset(); generate.reset(); }}>
                 {draft.seed !== null && <option value="" disabled>Generated shipment</option>}
-                {presets.map((item) => <option key={item.preset_id} value={item.preset_id!}>{item.lane} · {cargoWeight(item.quantity_t)}</option>)}
+                {(["mumbai", "regional"] as const).map((group) => (
+                  <optgroup key={group} label={group === "mumbai" ? "Mumbai" : "Regional"}>
+                    {presets.filter((item) => item.area === group).map((item) =>
+                      <option key={item.preset_id} value={item.preset_id!}>{item.lane} · {cargoWeight(item.quantity_t)}</option>)}
+                  </optgroup>
+                ))}
               </select>
             </label>
             <form className="flex flex-wrap items-end gap-2" onSubmit={(event) => { event.preventDefault(); if (seedValid && !busy) preview(); }}>

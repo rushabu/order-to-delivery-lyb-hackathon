@@ -137,7 +137,7 @@ export interface Fixtures {
     id: string;
     name: string;
     /** The fleet, used to choose a truck for a new order (orders/plan.ts). Absent in the test stand-ins. */
-    vehicles?: { registration: string; payload_capacity_t: number; tare_t: number; standby: boolean }[];
+    vehicles?: { registration: string; body?: string; payload_capacity_t: number; tare_t: number; standby: boolean }[];
   }[];
   routes: FixtureRoute[];
   alternatives: { route_id: string; alt_route_id: string; exit_km: number }[];

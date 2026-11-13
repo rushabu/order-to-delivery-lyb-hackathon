@@ -114,6 +114,8 @@ Either one replaces the invoice already there. The customer is notified, and the
 
 ### Seeded routes and new orders
 
+**New order** offers seven roads across five destinations. Ranjangaon has Talegaon–Chakan and Pune–Shikrapur. Satpur has Kasara Ghat and Wada–Trimbakeshwar. Vikhroli, Powai, and Chakan each have a dedicated route. The two Mumbai routes use delivery vans and support up to 1.4 t of cargo. The route catalog loads independently of sample orders.
+
 For seeded routes and shipments created through **New order**, TomTom also refreshes the active corridor roughly every five minutes. The coordinator can refresh manually from shipment detail. For moving trucks, the refresh also quotes configured bypasses that are still reachable and within the truck's restrictions. Simplified seed routes use a waypoint-based quote when TomTom cannot reconstruct the stored geometry.
 
 ### Preview an electric van

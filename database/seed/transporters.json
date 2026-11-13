@@ -49,6 +49,14 @@
           "payload_capacity_t": 20,
           "tare_t": 8.4,
           "standby": false
+        },
+        {
+          "id": "VEH-S6",
+          "registration": "MH 99 SB 6140",
+          "body": "Delivery van",
+          "payload_capacity_t": 1.4,
+          "tare_t": 2.1,
+          "standby": false
         }
       ]
     },
@@ -87,6 +95,14 @@
           "body": "12-wheeler",
           "payload_capacity_t": 25,
           "tare_t": 9.8,
+          "standby": false
+        },
+        {
+          "id": "VEH-K5",
+          "registration": "MH 99 KR 3320",
+          "body": "Delivery van",
+          "payload_capacity_t": 1.4,
+          "tare_t": 2.1,
           "standby": false
         }
       ]

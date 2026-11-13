@@ -30,6 +30,22 @@ describe('new orders and truck choice', () => {
   const plan = async (over: Record<string, unknown> = {}) => (await t.req('POST', '/orders/plan', coord, order(over))).body;
   const option = (p: any, id: string) => p.options.find((o: any) => o.id === id);
 
+  it('shows Kasara truck availability when the Wada gross limit blocks the load', async () => {
+    const load = { customer_id: 'CUS-02', route_id: 'RTE-02B', quantity_t: 15 };
+    const wada = await plan(load);
+    expect(wada.routes).toEqual([
+      { id: 'RTE-02', eligible_options: expect.any(Number) },
+      { id: 'RTE-02B', eligible_options: 0 },
+    ]);
+    expect(wada.routes[0].eligible_options).toBeGreaterThan(0);
+    expect(wada.options.some((o: any) => o.feasible)).toBe(false);
+    const kasara = await plan({ ...load, route_id: 'RTE-02' });
+    expect(kasara.recommended_option_id).toBeTruthy();
+    const customer = await t.login('USR-CUST-03');
+    expect((await t.req('GET', '/routes/RTE-02B', customer)).status).toBe(200);
+    expect((await t.req('GET', '/routes/RTE-01', customer)).status).toBe(404);
+  });
+
   it('recommends the planned truck to the same customer, and explains every candidate', async () => {
     const p = await plan();
     // Never another customer's truck; one separate-truck option per idle driver, by name. Ravi, Gurpreet and Sunil have trips.
@@ -149,6 +165,9 @@ describe('new orders and truck choice', () => {
     expect(form.customers).toEqual([
       { id: 'CUS-01', name: 'Deccan Mouldings Pvt Ltd', deliver_to: 'Deccan Mouldings, Ranjangaon MIDC' },
       { id: 'CUS-02', name: 'Godavari Flexipack Pvt Ltd', deliver_to: 'Godavari Flexipack, Satpur MIDC' },
+      { id: 'CUS-03', name: 'Plant X Demo Customer · Vikhroli', deliver_to: 'Vikhroli West, Mumbai · Sample receiving bay' },
+      { id: 'CUS-04', name: 'Plant X Demo Customer · Powai', deliver_to: 'Powai, Mumbai · Sample receiving bay' },
+      { id: 'CUS-05', name: 'Plant X Demo Customer · Chakan', deliver_to: 'Chakan MIDC, Pune district · Bulk receiving gate' },
     ]);
     expect(form.products).toContain('HDPE pellets, bagged');
 

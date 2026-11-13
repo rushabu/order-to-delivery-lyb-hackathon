@@ -519,7 +519,7 @@ export const NewOrderForm = z.object({
   now: IsoTime,
   customers: z.array(z.object({ id: z.string(), name: z.string(), deliver_to: z.string().nullable() })),
   products: z.array(z.string()),
-  routes: z.array(z.object({ id: z.string(), customer_id: z.string(), name: z.string(), max_gross_t: z.number().nullable() })),
+  routes: z.array(z.object({ id: z.string(), customer_id: z.string(), name: z.string(), total_km: z.number(), max_gross_t: z.number().nullable() })),
 });
 export const OrderDraft = z.object({
   customer_id: z.string().min(1).max(40),
@@ -552,5 +552,8 @@ export const TruckOption = z.object({
   driver_name: z.string().nullable(),
   note: z.string().nullable(),
 });
-export const OrderPlan = z.object({ options: z.array(TruckOption), recommended_option_id: z.string().nullable() });
+export const OrderPlan = z.object({
+  options: z.array(TruckOption), recommended_option_id: z.string().nullable(),
+  routes: z.array(z.object({ id: z.string(), eligible_options: z.number().int().nonnegative() })),
+});
 export const OrderCreated = z.object({ order_id: z.string(), shipment_id: z.string(), option: TruckOption });

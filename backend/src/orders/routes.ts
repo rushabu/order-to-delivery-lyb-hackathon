@@ -37,7 +37,7 @@ export function registerOrderRoutes(app: FastifyInstance, ctx: Ctx, reg: Registe
       const products = [...new Set([...ctx.fixtures.scenario.orders, ...ctx.fixtures.history].map((o) => o.product))].sort();
       const visibleCustomers = new Set(customers.map((c) => c.id));
       const routes = ctx.fixtures.routes.flatMap((r) => r.destination_customer_id && visibleCustomers.has(r.destination_customer_id) && !r.restrictions.closed
-        ? [{ id: r.id, name: r.name, customer_id: r.destination_customer_id, max_gross_t: r.restrictions.max_gross_t ?? null }]
+        ? [{ id: r.id, name: r.name, customer_id: r.destination_customer_id, total_km: r.total_km, max_gross_t: r.restrictions.max_gross_t ?? null }]
         : []);
       return { status: 200, body: { now: ctx.clock.nowIso(), customers, products, routes } };
     },
@@ -54,8 +54,14 @@ export function registerOrderRoutes(app: FastifyInstance, ctx: Ctx, reg: Registe
       ownOrder(user!, body.customer_id);
       const now = ctx.clock.nowIso();
       validateOrder(ctx, body, now);
-      const { options, recommended_option_id } = planOrder(ctx, body, now, user!.role === 'CUSTOMER' ? 'CUSTOMER' : 'COORDINATOR');
-      return { status: 200, body: { options, recommended_option_id } };
+      const audience = user!.role === 'CUSTOMER' ? 'CUSTOMER' : 'COORDINATOR';
+      const { options, recommended_option_id } = planOrder(ctx, body, now, audience);
+      const routes = ctx.fixtures.routes.filter((route) => route.destination_customer_id === body.customer_id && !route.restrictions.closed)
+        .map((route) => {
+          const candidates = route.id === body.route_id ? options : planOrder(ctx, { ...body, route_id: route.id }, now, audience).options;
+          return { id: route.id, eligible_options: candidates.filter((option) => option.feasible).length };
+        });
+      return { status: 200, body: { options, recommended_option_id, routes } };
     },
   });
 
