@@ -1,0 +1,89 @@
+{
+  "fictional": true,
+  "note": "STUB for API tests only. Live shipments for 16 November 2026 (DESIGN.md 6.6 and 10.1). Times are UTC; IST is UTC+5:30. ground_truth is what the simulator replays: waypoints {at, km} per route, linear between them. The SHP-1001 accident takes 75 min to clear (driver estimated 60).",
+  "scenario_id": "main",
+  "clock_start": "2026-11-16T03:20:00Z",
+  "pause_at": ["2026-11-16T03:45:00Z", "2026-11-16T04:00:00Z"],
+  "standby_vehicles": [{ "vehicle_reg": "MH-00-PX-2001", "transporter_id": "TRN-02", "available": true }],
+  "orders": [
+    { "id": "ORD-5001", "customer_id": "CUS-01", "product": "Polypropylene", "quantity_t": 24, "original_promised_by": "2026-11-16T06:15:00Z", "agreed_delivery_by": "2026-11-16T06:15:00Z" },
+    { "id": "ORD-5002", "customer_id": "CUS-02", "product": "HDPE granules", "quantity_t": 24, "original_promised_by": "2026-11-16T06:00:00Z", "agreed_delivery_by": "2026-11-16T06:00:00Z" },
+    { "id": "ORD-5003", "customer_id": "CUS-02", "product": "LLDPE film grade", "quantity_t": 16, "original_promised_by": "2026-11-16T09:30:00Z", "agreed_delivery_by": "2026-11-16T09:30:00Z" }
+  ],
+  "shipments": [
+    {
+      "id": "SHP-1001", "order_id": "ORD-5001", "transporter_id": "TRN-01", "driver_user_id": "USR-DRV-01", "vehicle_reg": "MH-00-PX-1001",
+      "quantity_t": 24, "gross_t": 33, "status": "IN_TRANSIT", "route_id": "RTE-01",
+      "planned_departure": "2026-11-16T02:30:00Z", "created_at": "2026-11-15T10:00:00Z",
+      "milestones": [
+        { "status": "DISPATCHED", "at": "2026-11-16T02:15:00Z" },
+        { "status": "IN_TRANSIT", "at": "2026-11-16T02:30:00Z" }
+      ],
+      "disruptions": []
+    },
+    {
+      "id": "SHP-1002", "order_id": "ORD-5002", "transporter_id": "TRN-02", "driver_user_id": "USR-DRV-02", "vehicle_reg": "MH-00-PX-1002",
+      "quantity_t": 24, "gross_t": 34, "status": "IN_TRANSIT", "route_id": "RTE-02",
+      "planned_departure": "2026-11-16T02:30:00Z", "created_at": "2026-11-15T10:00:00Z",
+      "milestones": [
+        { "status": "DISPATCHED", "at": "2026-11-16T02:15:00Z" },
+        { "status": "IN_TRANSIT", "at": "2026-11-16T02:30:00Z" }
+      ],
+      "disruptions": []
+    },
+    {
+      "id": "SHP-1003", "order_id": "ORD-5003", "transporter_id": "TRN-02", "driver_user_id": "USR-DRV-03", "vehicle_reg": "MH-00-PX-1003",
+      "quantity_t": 16, "gross_t": 26, "status": "PLANNED", "route_id": "RTE-02",
+      "planned_departure": "2026-11-16T05:30:00Z", "created_at": "2026-11-15T10:00:00Z",
+      "milestones": [],
+      "disruptions": [
+        { "id": "4a1f2b3c-5d6e-4f70-8a9b-0c1d2e3f4a52", "category": "LOADING_DELAY", "at_km": null, "note": "Silo discharge slow", "reported_at": "2026-11-16T03:00:00Z" }
+      ]
+    }
+  ],
+  "ground_truth": {
+    "SHP-1001": {
+      "deliver_after_min": 15,
+      "common": [
+        { "at": "2026-11-16T02:30:00Z", "km": 0 },
+        { "at": "2026-11-16T03:30:00Z", "km": 40 },
+        { "at": "2026-11-16T04:09:00Z", "km": 66 }
+      ],
+      "branches": {
+        "RTE-01": [
+          { "at": "2026-11-16T04:22:00Z", "km": 75 },
+          { "at": "2026-11-16T05:15:00Z", "km": 75 },
+          { "at": "2026-11-16T05:55:00Z", "km": 100 },
+          { "at": "2026-11-16T06:10:00Z", "km": 100 },
+          { "at": "2026-11-16T07:10:00Z", "km": 150 }
+        ],
+        "RTE-01B": [
+          { "at": "2026-11-16T06:13:00Z", "km": 166 }
+        ]
+      }
+    },
+    "SHP-1002": {
+      "deliver_after_min": 15,
+      "common": [
+        { "at": "2026-11-16T02:30:00Z", "km": 0 },
+        { "at": "2026-11-16T03:42:00Z", "km": 60 },
+        { "at": "2026-11-16T04:10:00Z", "km": 88 }
+      ],
+      "branches": {
+        "RTE-02": [
+          { "at": "2026-11-16T05:10:00Z", "km": 118 },
+          { "at": "2026-11-16T06:12:00Z", "km": 180 }
+        ]
+      }
+    }
+  },
+  "scripted_events": [
+    {
+      "note": "Background driver report on the second shipment (not a presented beat), so SHP-1002 is in trouble by the 3:00 demo beat.",
+      "at": "2026-11-16T04:10:00Z",
+      "shipment_id": "SHP-1002",
+      "type": "DISRUPTION_REPORTED",
+      "payload": { "disruption_id": "0c7e5c2a-6f3d-4b1e-9a2f-1d2e3f4a5b61", "category": "WEATHER", "at_km": 100, "note": "Heavy rain on the ghat section" }
+    }
+  ]
+}

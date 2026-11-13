@@ -1,0 +1,38 @@
+{
+  "fictional": true,
+  "note": "STUB for API tests only, until the data agent's fixtures/ land on main. Values are the fictional starting thresholds from DESIGN.md section 6.",
+  "eta": {
+    "pace_window_min": 15,
+    "pace_min_positions": 3,
+    "pace_horizon_km": 50,
+    "slowdown_min": 0.8,
+    "slowdown_max": 2.0,
+    "pace_min_factor_min": 3,
+    "disruption_floor_min": 15,
+    "margin_floor_min": 20,
+    "margin_pct": 10,
+    "stale_after_min": 10,
+    "stale_margin_max_add_min": 60,
+    "tracking_lost_after_min": 30,
+    "risk_medium_from": 35,
+    "risk_high_from": 70
+  },
+  "category_default_delay_min": {
+    "ACCIDENT": 60,
+    "BREAKDOWN": 120,
+    "WEATHER": 45,
+    "ROAD_CLOSURE": 90,
+    "LOADING_DELAY": 30,
+    "OTHER": 30
+  },
+  "alerts": { "resolve_after_low_min": 10 },
+  "options": {
+    "valid_for_min": 10,
+    "improvement_threshold_min": 10,
+    "cost_per_km_inr": 45,
+    "standby_vehicle_cost_inr": 4000,
+    "split_min_quantity_t": 2
+  },
+  "impact": { "cost_per_late_hour_inr": 1500 },
+  "demo": { "speed": 60, "position_interval_min": 5, "stale_tick_min": 5 }
+}

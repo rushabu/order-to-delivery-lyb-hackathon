@@ -1,0 +1,227 @@
+{
+  "fictional": true,
+  "note": "STUB for API tests only. Fictional routes; geometry is a simplified line, not a real road.",
+  "routes": [
+    {
+      "id": "RTE-01",
+      "name": "Plant X to Pune via expressway",
+      "origin": "Plant X (Panvel area)",
+      "destination": "Pune",
+      "total_km": 150,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.12,
+            18.99
+          ],
+          [
+            73.49,
+            18.755
+          ],
+          [
+            73.86,
+            18.52
+          ]
+        ]
+      },
+      "restrictions": {
+        "max_gross_t": null,
+        "closed": false
+      },
+      "segments": [
+        {
+          "seq": 1,
+          "start_km": 0,
+          "end_km": 40,
+          "baseline_speed_kmph": 40,
+          "dwell_after_min": 0
+        },
+        {
+          "seq": 2,
+          "start_km": 40,
+          "end_km": 100,
+          "baseline_speed_kmph": 60,
+          "dwell_after_min": 15
+        },
+        {
+          "seq": 3,
+          "start_km": 100,
+          "end_km": 150,
+          "baseline_speed_kmph": 50,
+          "dwell_after_min": 0
+        }
+      ]
+    },
+    {
+      "id": "RTE-01B",
+      "name": "Khalapur bypass",
+      "origin": "Plant X (Panvel area)",
+      "destination": "Pune",
+      "total_km": 166,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.12,
+            18.99
+          ],
+          [
+            73.445756,
+            18.783101
+          ],
+          [
+            73.563324,
+            18.524972
+          ],
+          [
+            73.86,
+            18.52
+          ]
+        ]
+      },
+      "restrictions": {
+        "max_gross_t": null,
+        "closed": false
+      },
+      "segments": [
+        {
+          "seq": 1,
+          "start_km": 0,
+          "end_km": 40,
+          "baseline_speed_kmph": 40,
+          "dwell_after_min": 0
+        },
+        {
+          "seq": 2,
+          "start_km": 40,
+          "end_km": 66,
+          "baseline_speed_kmph": 60,
+          "dwell_after_min": 0
+        },
+        {
+          "seq": 3,
+          "start_km": 66,
+          "end_km": 166,
+          "baseline_speed_kmph": 50,
+          "dwell_after_min": 0
+        }
+      ]
+    },
+    {
+      "id": "RTE-02",
+      "name": "Plant X to Nashik",
+      "origin": "Plant X (Panvel area)",
+      "destination": "Nashik",
+      "total_km": 180,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.12,
+            18.99
+          ],
+          [
+            73.455,
+            19.49
+          ],
+          [
+            73.79,
+            19.99
+          ]
+        ]
+      },
+      "restrictions": {
+        "max_gross_t": null,
+        "closed": false
+      },
+      "segments": [
+        {
+          "seq": 1,
+          "start_km": 0,
+          "end_km": 60,
+          "baseline_speed_kmph": 50,
+          "dwell_after_min": 0
+        },
+        {
+          "seq": 2,
+          "start_km": 60,
+          "end_km": 180,
+          "baseline_speed_kmph": 60,
+          "dwell_after_min": 0
+        }
+      ]
+    },
+    {
+      "id": "RTE-02B",
+      "name": "Ghat bypass (weight limited)",
+      "origin": "Plant X (Panvel area)",
+      "destination": "Nashik",
+      "total_km": 190,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.12,
+            18.99
+          ],
+          [
+            73.455,
+            19.49
+          ],
+          [
+            73.566568,
+            19.65652
+          ],
+          [
+            73.571599,
+            19.886519
+          ],
+          [
+            73.79,
+            19.99
+          ]
+        ]
+      },
+      "restrictions": {
+        "max_gross_t": 20,
+        "closed": false
+      },
+      "segments": [
+        {
+          "seq": 1,
+          "start_km": 0,
+          "end_km": 60,
+          "baseline_speed_kmph": 50,
+          "dwell_after_min": 0
+        },
+        {
+          "seq": 2,
+          "start_km": 60,
+          "end_km": 120,
+          "baseline_speed_kmph": 60,
+          "dwell_after_min": 0
+        },
+        {
+          "seq": 3,
+          "start_km": 120,
+          "end_km": 190,
+          "baseline_speed_kmph": 50,
+          "dwell_after_min": 0
+        }
+      ]
+    }
+  ],
+  "alternatives": [
+    {
+      "route_id": "RTE-01",
+      "alt_route_id": "RTE-01B",
+      "exit_km": 66
+    },
+    {
+      "route_id": "RTE-02",
+      "alt_route_id": "RTE-02B",
+      "exit_km": 120
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "fictional": true,
+  "note": "STUB for API tests only. Fictional customers.",
+  "customers": [
+    { "id": "CUS-01", "name": "Deccan Mouldings Pvt Ltd", "delivery_lat": 18.52, "delivery_lng": 73.86 },
+    { "id": "CUS-02", "name": "Godavari Polymers Pvt Ltd", "delivery_lat": 19.99, "delivery_lng": 73.79 }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "fictional": true,
+  "note": "STUB for API tests only. Fictional haulage companies.",
+  "transporters": [
+    { "id": "TRN-01", "name": "Sahyadri Bulk Carriers" },
+    { "id": "TRN-02", "name": "Konkan Freightways" }
+  ]
+}

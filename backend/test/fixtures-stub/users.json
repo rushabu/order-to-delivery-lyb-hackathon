@@ -1,0 +1,14 @@
+{
+  "fictional": true,
+  "note": "STUB for API tests only. Fictional people and fictional demo passwords (DESIGN.md 9.3). Phone numbers are not real.",
+  "users": [
+    { "id": "USR-COORD-01", "name": "Asha Menon", "email": "coordinator1@plantx.example", "password": "stub-coord-1-pass", "role": "COORDINATOR", "phone": "+91 00000 10001" },
+    { "id": "USR-COORD-02", "name": "Rohan Desai", "email": "coordinator2@plantx.example", "password": "stub-coord-2-pass", "role": "COORDINATOR", "phone": "+91 00000 10002" },
+    { "id": "USR-DRV-01", "name": "Vikram Patil", "email": "driver1@sahyadri.example", "password": "stub-driver-1-pass", "role": "DRIVER", "transporter_id": "TRN-01", "phone": "+91 00000 20001" },
+    { "id": "USR-DRV-02", "name": "Sunil Jadhav", "email": "driver2@konkan.example", "password": "stub-driver-2-pass", "role": "DRIVER", "transporter_id": "TRN-02", "phone": "+91 00000 20002" },
+    { "id": "USR-DRV-03", "name": "Imran Shaikh", "email": "driver3@konkan.example", "password": "stub-driver-3-pass", "role": "DRIVER", "transporter_id": "TRN-02", "phone": "+91 00000 20003" },
+    { "id": "USR-CUST-01", "name": "Neha Joshi", "email": "buyer@deccan.example", "password": "stub-cust-1-pass", "role": "CUSTOMER", "customer_id": "CUS-01" },
+    { "id": "USR-CUST-02", "name": "Karan Mehta", "email": "buyer1@godavari.example", "password": "stub-cust-2-pass", "role": "CUSTOMER", "customer_id": "CUS-02" },
+    { "id": "USR-CUST-03", "name": "Priya Rao", "email": "buyer2@godavari.example", "password": "stub-cust-3-pass", "role": "CUSTOMER", "customer_id": "CUS-02" }
+  ]
+}
